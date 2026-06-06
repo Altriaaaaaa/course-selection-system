@@ -1,15 +1,70 @@
-<!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('开课申请')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12">
-<div class="btn-group-sm"><a class="btn btn-primary" href="proposal/add">新增申请</a></div>
-<div class="select-table table-striped"><table id="bootstrap-table"></table></div></div></div></div>
+<body class="gray-bg">
+<style>
+.page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.page-toolbar .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.status-pending {
+    background-color: #fff8e6;
+    color: #c79520;
+    border: 1px solid #f5e0a0;
+}
+.status-approved {
+    background-color: #e8f8f5;
+    color: #1a8a6e;
+    border: 1px solid #a3e4d7;
+}
+.status-rejected {
+    background-color: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5b7b1;
+}
+</style>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-file-text-o"></i> 开课申请</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="page-toolbar">
+                        <a class="btn btn-primary btn-add" href="proposal/add">
+                            <i class="fa fa-plus"></i> 新增申请
+                        </a>
+                    </div>
+                    <div class="select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){
   $.table.init({url:ctx+"teacher/proposal/list",search:false,modalName:"开课申请",uniqueId:"cno",
     columns:[{field:"cno",title:"课程号"},{field:"cname",title:"课程名"},{field:"credit",title:"学分"},
       {field:"hours",title:"学时"},{field:"courseType",title:"类型",formatter:function(v){return v==0?"必修":"选修";}},
-      {field:"status",title:"状态",formatter:function(v){if(v==0)return'<span class="label label-warning">待审核</span>';if(v==1)return'<span class="label label-success">已通过</span>';return'<span class="label label-danger">已驳回</span>';}},
+      {field:"status",title:"状态",formatter:function(v){if(v==0)return'<span class=\"status-badge status-pending\">待审核</span>';if(v==1)return'<span class=\"status-badge status-approved\">已通过</span>';return'<span class=\"status-badge status-rejected\">已驳回</span>';}},
       {field:"rejectReason",title:"备注"}]});
 });
 </script></body></html>

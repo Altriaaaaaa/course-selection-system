@@ -1,7 +1,21 @@
 <!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('课程审核')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12 select-table table-striped">
-<table id="bootstrap-table"></table></div></div></div>
+<head><th:block th:include="include :: header('课程审核')" />
+<style>
+    .audit-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--secondary);
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+</style>
+</head>
+<body class="gray-bg"><div class="container-div"><div class="row">
+<div class="col-sm-12">
+    <div class="audit-title">课程审核列表</div>
+    <div class="select-table table-striped">
+<table id="bootstrap-table"></table></div></div></div></div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){

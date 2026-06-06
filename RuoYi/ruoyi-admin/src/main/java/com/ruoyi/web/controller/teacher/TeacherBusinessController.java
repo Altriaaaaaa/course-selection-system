@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,9 +25,11 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.Class;
 import com.ruoyi.system.domain.CourseSelection;
+import com.ruoyi.system.domain.CourseSwap;
 import com.ruoyi.system.domain.Teacher;
 import com.ruoyi.system.service.IClassService;
 import com.ruoyi.system.service.ICourseSelectionService;
+import com.ruoyi.system.service.ICourseSwapService;
 import com.ruoyi.system.service.ITeacherService;
 
 @Controller
@@ -42,6 +45,9 @@ public class TeacherBusinessController extends BaseController
 
     @Autowired
     private ITeacherService teacherService;
+
+    @Autowired
+    private ICourseSwapService courseSwapService;
 
     @GetMapping("/index")
     public String index(ModelMap mmap)
@@ -195,5 +201,268 @@ public class TeacherBusinessController extends BaseController
         clazz.setExamTime(examTime);
         classService.updateClass(clazz);
         return success("考试时间已更新");
+    }
+
+    @GetMapping("/swap")
+    public String swap(ModelMap mmap)
+    {
+        mmap.put("tno", getLoginName());
+        return "teacher/swap";
+    }
+
+    @PostMapping("/swap/list")
+    @ResponseBody
+    public TableDataInfo swapList(String tno)
+    {
+        CourseSwap cs = new CourseSwap();
+        cs.setFromTno(tno);
+        List<CourseSwap> list1 = courseSwapService.selectCourseSwapList(cs);
+        CourseSwap cs2 = new CourseSwap();
+        cs2.setToTno(tno);
+        List<CourseSwap> list2 = courseSwapService.selectCourseSwapList(cs2);
+        list1.addAll(list2);
+        return getDataTable(list1);
+    }
+
+    @PostMapping("/swap/request")
+    @ResponseBody
+    public AjaxResult swapRequest(String fromTno, String fromCno, String toTno, String toCno, String swapWeek, String reason)
+    {
+        try
+        {
+            CourseSwap swap = new CourseSwap();
+            swap.setFromTno(fromTno);
+            swap.setFromCno(fromCno);
+            swap.setToTno(toTno);
+            swap.setToCno(toCno);
+            swap.setSwapWeek(swapWeek);
+            swap.setReason(reason);
+            courseSwapService.insertCourseSwap(swap);
+            return success("换课申请已提交");
+        }
+        catch (Exception e)
+        {
+            return error("申请失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/swap/approve")
+    @ResponseBody
+    public AjaxResult swapApprove(Integer swapId)
+    {
+        try
+        {
+            courseSwapService.approveCourseSwap(swapId);
+            return success("换课申请已批准");
+        }
+        catch (IllegalArgumentException e)
+        {
+            return error(e.getMessage());
+        }
+        catch (Exception e)
+        {
+            return error("批准失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/swap/reject")
+    @ResponseBody
+    public AjaxResult swapReject(Integer swapId)
+    {
+        CourseSwap swap = courseSwapService.selectCourseSwapById(swapId);
+        if (swap == null) return error("申请不存在");
+        swap.setStatus(2);
+        courseSwapService.updateCourseSwap(swap);
+        return success("换课申请已拒绝");
+    }
+
+    @PostMapping("/swap/available/teachers")
+    @ResponseBody
+    public AjaxResult availableTeachers(String tno)
+    {
+        List<Teacher> list = teacherService.selectTeacherList(new Teacher());
+        List<Teacher> result = new ArrayList<>();
+        for (Teacher t : list)
+        {
+            if (!t.getTno().equals(tno))
+            {
+                result.add(t);
+            }
+        }
+        return success().put("data", result);
+    }
+
+    /**
+     * 教师教学数据概览
+     */
+    @PostMapping("/dashboard/overview")
+    @ResponseBody
+    public AjaxResult dashboardOverview(String tno)
+    {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 1. 总课程数
+        Class clazzQuery = new Class();
+        clazzQuery.setTno(tno);
+        List<Class> courseList = classService.selectClassList(clazzQuery);
+        result.put("totalCourses", courseList.size());
+        
+        // 2. 总学生数（去重）
+        int totalStudents = 0;
+        int totalWithGrades = 0;
+        double sumTotalScore = 0;
+        int passCount = 0;
+        int failCount = 0;
+        
+        // 成绩分布
+        int excellent = 0; // 90-100
+        int good = 0;      // 80-89
+        int medium = 0;    // 70-79
+        int pass = 0;      // 60-69
+        int fail = 0;      // <60
+        
+        // 课程成绩统计
+        List<Map<String, Object>> courseStats = new ArrayList<>();
+        
+        for (Class clazz : courseList)
+        {
+            String cno = clazz.getCno();
+            CourseSelection csQuery = new CourseSelection();
+            csQuery.setCno(cno);
+            List<CourseSelection> students = courseSelectionService.selectCourseSelectionList(csQuery);
+            
+            int courseStudentCount = students.size();
+            totalStudents += courseStudentCount;
+            
+            double courseSum = 0;
+            int courseWithGrades = 0;
+            int coursePass = 0;
+            int courseFail = 0;
+            
+            for (CourseSelection cs : students)
+            {
+                if (cs.getNormalScore() != null && cs.getTestScore() != null)
+                {
+                    double total = cs.getNormalScore().doubleValue() * 0.4 + cs.getTestScore().doubleValue() * 0.6;
+                    totalWithGrades++;
+                    sumTotalScore += total;
+                    courseSum += total;
+                    courseWithGrades++;
+                    
+                    if (total >= 60)
+                    {
+                        passCount++;
+                        coursePass++;
+                    }
+                    else
+                    {
+                        failCount++;
+                        courseFail++;
+                    }
+                    
+                    if (total >= 90) excellent++;
+                    else if (total >= 80) good++;
+                    else if (total >= 70) medium++;
+                    else if (total >= 60) pass++;
+                    else fail++;
+                }
+            }
+            
+            Map<String, Object> stat = new HashMap<>();
+            stat.put("cno", cno);
+            stat.put("cname", clazz.getCname());
+            stat.put("studentCount", courseStudentCount);
+            stat.put("avgScore", courseWithGrades > 0 ? Math.round(courseSum / courseWithGrades * 100.0) / 100.0 : 0);
+            stat.put("passCount", coursePass);
+            stat.put("failCount", courseFail);
+            stat.put("passRate", courseWithGrades > 0 ? Math.round((double) coursePass / courseWithGrades * 10000.0) / 100.0 : 0);
+            courseStats.add(stat);
+        }
+        
+        result.put("totalStudents", totalStudents);
+        result.put("totalWithGrades", totalWithGrades);
+        result.put("avgScore", totalWithGrades > 0 ? Math.round(sumTotalScore / totalWithGrades * 100.0) / 100.0 : 0);
+        result.put("passRate", totalWithGrades > 0 ? Math.round((double) passCount / totalWithGrades * 10000.0) / 100.0 : 0);
+        result.put("passCount", passCount);
+        result.put("failCount", failCount);
+        
+        // 成绩分布
+        Map<String, Object> gradeDist = new HashMap<>();
+        gradeDist.put("excellent", excellent);
+        gradeDist.put("good", good);
+        gradeDist.put("medium", medium);
+        gradeDist.put("pass", pass);
+        gradeDist.put("fail", fail);
+        result.put("gradeDistribution", gradeDist);
+        
+        // 课程统计
+        result.put("courseStats", courseStats);
+        
+        return success().put("data", result);
+    }
+
+    /**
+     * 学生成绩排名
+     */
+    @PostMapping("/dashboard/rankings")
+    @ResponseBody
+    public AjaxResult dashboardRankings(String tno)
+    {
+        List<Map<String, Object>> rankings = new ArrayList<>();
+        
+        Class clazzQuery = new Class();
+        clazzQuery.setTno(tno);
+        List<Class> courseList = classService.selectClassList(clazzQuery);
+        
+        for (Class clazz : courseList)
+        {
+            String cno = clazz.getCno();
+            CourseSelection csQuery = new CourseSelection();
+            csQuery.setCno(cno);
+            List<CourseSelection> students = courseSelectionService.selectCourseSelectionList(csQuery);
+            
+            for (CourseSelection cs : students)
+            {
+                if (cs.getNormalScore() != null && cs.getTestScore() != null)
+                {
+                    double total = cs.getNormalScore().doubleValue() * 0.4 + cs.getTestScore().doubleValue() * 0.6;
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("sno", cs.getSno());
+                    row.put("sname", cs.getSname());
+                    row.put("cno", cno);
+                    row.put("cname", clazz.getCname());
+                    row.put("normalScore", cs.getNormalScore());
+                    row.put("testScore", cs.getTestScore());
+                    row.put("totalScore", Math.round(total * 10.0) / 10.0);
+                    row.put("gpa", calculateGpa(total));
+                    rankings.add(row);
+                }
+            }
+        }
+        
+        // 按总评降序排序
+        rankings.sort((a, b) -> Double.compare((Double) b.get("totalScore"), (Double) a.get("totalScore")));
+        
+        // 添加排名
+        for (int i = 0; i < rankings.size(); i++)
+        {
+            rankings.get(i).put("rank", i + 1);
+        }
+        
+        return success().put("data", rankings);
+    }
+
+    private double calculateGpa(double score)
+    {
+        if (score >= 90) return 4.0;
+        if (score >= 85) return 3.7;
+        if (score >= 82) return 3.3;
+        if (score >= 78) return 3.0;
+        if (score >= 75) return 2.7;
+        if (score >= 72) return 2.3;
+        if (score >= 68) return 2.0;
+        if (score >= 64) return 1.5;
+        if (score >= 60) return 1.0;
+        return 0.0;
     }
 }

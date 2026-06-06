@@ -1,14 +1,47 @@
-<!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('课程公告')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12">
-<a class="btn btn-primary btn-sm" th:href="@{/teacher/notice/add}">发布公告</a>
-<div class="select-table table-striped"><table id="bootstrap-table"></table></div></div></div></div>
+<body class="gray-bg">
+<style>
+.page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.page-toolbar .btn-publish {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+</style>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-bullhorn"></i> 课程公告</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="page-toolbar">
+                        <a class="btn btn-primary btn-publish" th:href="@{/teacher/notice/add}">
+                            <i class="fa fa-plus"></i> 发布公告
+                        </a>
+                    </div>
+                    <div class="select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){
   $.table.init({url:ctx+"teacher/notice/list",createUrl:undefined,updateUrl:undefined,removeUrl:undefined,modalName:"公告",uniqueId:"noticeId",
     columns:[{field:"title",title:"标题"},{field:"cname",title:"课程"},{field:"content",title:"内容"},{field:"createTime",title:"发布时间"},
-      {title:"操作",formatter:function(v,r,i){return'<a class="btn btn-danger btn-xs del-btn" data-id="'+r.noticeId+'">删除</a>';}}]});
+      {title:"操作",formatter:function(v,r,i){return'<a class="btn btn-danger btn-xs del-btn" data-id="'+r.noticeId+'"><i class=\"fa fa-trash\"></i> 删除</a>';}}]});
   $(document).on('click','.del-btn',function(){var id=$(this).data('id');$.modal.confirm("确认删除？",function(){$.post(ctx+'teacher/notice/remove',{ids:id.toString()},function(r){if(r.code==0)$.table.refresh();});});});
 });
 </script></body></html>

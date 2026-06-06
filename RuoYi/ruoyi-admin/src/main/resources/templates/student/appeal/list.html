@@ -1,7 +1,23 @@
 <!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('成绩申诉')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12 select-table table-striped">
-<table id="bootstrap-table"></table></div></div></div>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12" style="margin-bottom:15px">
+            <a class="btn btn-primary" th:href="@{/student/index(sno=${sno})}"><i class="fa fa-arrow-left"></i> 返回首页</a>
+        </div>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-gavel" style="color:#ed5565;margin-right:8px;"></i>成绩申诉</h5>
+                </div>
+                <div class="ibox-content">
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){

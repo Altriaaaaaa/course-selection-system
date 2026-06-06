@@ -1,7 +1,10 @@
 package com.ruoyi.web.controller.student;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,9 +16,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.Class;
 import com.ruoyi.system.domain.Course;
 import com.ruoyi.system.domain.CourseSelection;
 import com.ruoyi.system.domain.Student;
+import com.ruoyi.system.service.IClassService;
 import com.ruoyi.system.service.ICourseService;
 import com.ruoyi.system.service.ICourseSelectionService;
 import com.ruoyi.system.service.IStudentService;
@@ -31,6 +36,8 @@ public class StudentBusinessController extends BaseController
     private ICourseSelectionService courseSelectionService;
     @Autowired
     private IStudentService studentService;
+    @Autowired
+    private IClassService classService;
 
     @GetMapping("/index")
     public String index(ModelMap mmap)
@@ -59,6 +66,36 @@ public class StudentBusinessController extends BaseController
     {
         try
         {
+            // 查询新课程的上课时间
+            Class classQuery = new Class();
+            classQuery.setCno(cno);
+            List<Class> classList = classService.selectClassList(classQuery);
+            if (classList != null && !classList.isEmpty())
+            {
+                String newClassTime = classList.get(0).getClassTime();
+                if (newClassTime != null && !newClassTime.isEmpty())
+                {
+                    // 查询学生已选课程的上课时间
+                    List<Map<String, Object>> scheduleList = courseSelectionService.selectStudentSchedule(sno);
+                    for (Map<String, Object> schedule : scheduleList)
+                    {
+                        String existCno = (String) schedule.get("cno");
+                        // 跳过同一门课程（已由重复检测处理）
+                        if (cno.equals(existCno))
+                        {
+                            continue;
+                        }
+                        String existClassTime = (String) schedule.get("classTime");
+                        String existCname = (String) schedule.get("cname");
+                        if (existClassTime != null && !existClassTime.isEmpty()
+                            && checkTimeConflict(newClassTime, existClassTime))
+                        {
+                            return error("选课冲突：与已选课程「" + existCname + "」的上课时间冲突，无法选课");
+                        }
+                    }
+                }
+            }
+
             CourseSelection cs = new CourseSelection();
             cs.setSno(sno);
             cs.setCno(cno);
@@ -190,5 +227,71 @@ public class StudentBusinessController extends BaseController
     }
     @GetMapping("/exam")
     public String exam(ModelMap mmap) { mmap.put("sno", getLoginName()); return "student/exam"; }
+
+    /**
+     * 检查两个课程的上课时间是否冲突
+     * class_time 格式如 "周一3-4节 周三1-2节"
+     * 冲突条件：同一天 + 节次范围有交集
+     */
+    private boolean checkTimeConflict(String time1, String time2)
+    {
+        // 解析时间字符串为 (星期几, 起始节, 结束节) 列表
+        List<int[]> slots1 = parseClassTime(time1);
+        List<int[]> slots2 = parseClassTime(time2);
+        // 比较所有时间段，同一天且节次有交集则冲突
+        for (int[] s1 : slots1)
+        {
+            for (int[] s2 : slots2)
+            {
+                if (s1[0] == s2[0] && s1[1] <= s2[2] && s2[1] <= s1[2])
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 解析 class_time 字符串，提取每个时间段的 (星期几, 起始节, 结束节)
+     * 支持格式：周一3-4节、周二1-2节、周X N-M节 等
+     */
+    private List<int[]> parseClassTime(String classTime)
+    {
+        List<int[]> result = new ArrayList<int[]>();
+        if (classTime == null || classTime.isEmpty())
+        {
+            return result;
+        }
+        // 匹配 "周X" + 数字-数字 + "节"
+        Pattern pattern = Pattern.compile("周([一二三四五六七日天])\\s*(\\d+)\\s*-\\s*(\\d+)\\s*节");
+        Matcher matcher = pattern.matcher(classTime);
+        while (matcher.find())
+        {
+            int day = parseDay(matcher.group(1));
+            int start = Integer.parseInt(matcher.group(2));
+            int end = Integer.parseInt(matcher.group(3));
+            result.add(new int[]{day, start, end});
+        }
+        return result;
+    }
+
+    /**
+     * 将中文星期转换为数字（1=周一, 7=周日）
+     */
+    private int parseDay(String dayStr)
+    {
+        switch (dayStr)
+        {
+            case "一": return 1;
+            case "二": return 2;
+            case "三": return 3;
+            case "四": return 4;
+            case "五": return 5;
+            case "六": return 6;
+            case "七": case "日": case "天": return 7;
+            default: return 0;
+        }
+    }
 
 }

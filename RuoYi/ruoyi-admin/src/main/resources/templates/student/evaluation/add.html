@@ -1,12 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('提交课程评价')" /></head>
+<style>
+#star-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+#star-rating .star-item {
+    cursor: pointer;
+    font-size: 32px;
+    color: #ccc;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+#star-rating .star-item:hover {
+    transform: scale(1.15);
+}
+#star-rating .star-item i.fa-star {
+    color: #f0ad4e;
+}
+#rating-text {
+    font-size: 16px;
+    margin-left: 12px;
+    color: #676a6c;
+}
+</style>
 <body class="gray-bg">
 <div class="wrapper wrapper-content">
 <div class="row">
 <div class="col-sm-12">
-<div class="ibox">
-<div class="ibox-title"><h5>课程评价 - <span th:text="${cname}">课程名</span>（<span th:text="${cno}">CNO001</span>）</h5></div>
+<div class="ibox float-e-margins">
+<div class="ibox-title">
+    <h5><i class="fa fa-star" style="color:#f8ac59;margin-right:8px;"></i>课程评价 - <span th:text="${cname}">课程名</span>（<span th:text="${cno}">CNO001</span>）</h5>
+</div>
 <div class="ibox-content">
 <div th:if="${alreadyEvaluated}" class="alert alert-warning">
     <i class="fa fa-warning"></i> 您已经评价过该课程，不能重复评价。
@@ -19,12 +45,12 @@
         <label class="col-sm-2 control-label">星级评分</label>
         <div class="col-sm-10">
             <div id="star-rating">
-                <span class="star-item" data-star="1"><i class="fa fa-star-o fa-2x"></i></span>
-                <span class="star-item" data-star="2"><i class="fa fa-star-o fa-2x"></i></span>
-                <span class="star-item" data-star="3"><i class="fa fa-star-o fa-2x"></i></span>
-                <span class="star-item" data-star="4"><i class="fa fa-star-o fa-2x"></i></span>
-                <span class="star-item" data-star="5"><i class="fa fa-star-o fa-2x"></i></span>
-                <span id="rating-text" class="text-muted" style="margin-left:12px;font-size:16px;">请点击星星评分</span>
+                <span class="star-item" data-star="1"><i class="fa fa-star-o"></i></span>
+                <span class="star-item" data-star="2"><i class="fa fa-star-o"></i></span>
+                <span class="star-item" data-star="3"><i class="fa fa-star-o"></i></span>
+                <span class="star-item" data-star="4"><i class="fa fa-star-o"></i></span>
+                <span class="star-item" data-star="5"><i class="fa fa-star-o"></i></span>
+                <span id="rating-text" class="text-muted">请点击星星评分</span>
             </div>
         </div>
     </div>

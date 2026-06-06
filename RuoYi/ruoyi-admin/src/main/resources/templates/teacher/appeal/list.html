@@ -1,13 +1,53 @@
-<!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('成绩申诉')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12 select-table table-striped">
-<table id="bootstrap-table"></table></div></div></div>
+<body class="gray-bg">
+<style>
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.status-pending {
+    background-color: #fff8e6;
+    color: #c79520;
+    border: 1px solid #f5e0a0;
+}
+.status-approved {
+    background-color: #e8f8f5;
+    color: #1a8a6e;
+    border: 1px solid #a3e4d7;
+}
+.status-rejected {
+    background-color: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5b7b1;
+}
+</style>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-gavel"></i> 成绩申诉</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){
   $.table.init({url:ctx+"teacher/appeal/list",createUrl:undefined,updateUrl:undefined,removeUrl:undefined,modalName:"申诉处理",uniqueId:"appealId",
     columns:[{field:"sname",title:"学生"},{field:"cname",title:"课程"},{field:"reason",title:"申诉理由"},
-      {field:"status",title:"状态",formatter:function(v){if(v==0)return'<span class="label label-warning">待处理</span>';if(v==1)return'<span class="label label-success">已同意</span>';return'<span class="label label-danger">已驳回</span>';}},
+      {field:"status",title:"状态",formatter:function(v){if(v==0)return'<span class=\"status-badge status-pending\">待处理</span>';if(v==1)return'<span class=\"status-badge status-approved\">已同意</span>';return'<span class=\"status-badge status-rejected\">已驳回</span>';}},
       {title:"操作",formatter:function(v,r,i){if(r.status!=0)return'';return'<a class="btn btn-success btn-xs" onclick="handleAppeal('+r.appealId+',1)">同意</a> <a class="btn btn-danger btn-xs" onclick="handleAppeal('+r.appealId+',2)">驳回</a>';}}]});
 });
 function handleAppeal(id,act){var label=act==1?'同意':'驳回';layer.prompt({title:'请输入'+label+'理由',formType:2},function(reply,idx){layer.close(idx);$.post(ctx+'teacher/appeal/handle',{appealId:id,status:act,reply:reply},function(r){if(r.code==0)$.table.refresh();});});}

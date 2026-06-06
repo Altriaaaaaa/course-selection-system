@@ -4,8 +4,18 @@
 <body class="gray-bg">
 <div class="container-div">
     <div class="row">
-        <div class="col-sm-12 select-table table-striped">
-            <table id="bootstrap-table"></table>
+        <div class="col-sm-12" style="margin-bottom:15px">
+            <a class="btn btn-primary" th:href="@{/student/index(sno=${sno})}"><i class="fa fa-arrow-left"></i> 返回首页</a>
+        </div>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-clock-o" style="color:#ed5565;margin-right:8px;"></i>考试时间</h5>
+                </div>
+                <div class="ibox-content">
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

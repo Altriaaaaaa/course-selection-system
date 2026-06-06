@@ -1,20 +1,61 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('可选课程')" /></head>
 <body class="gray-bg">
 <div class="container-div">
     <div class="row">
-        <div class="col-sm-12 search-collapse">
-            <form id="course-form">
-                <div class="select-list">
-                    <ul>
-                        <li>学期：<input type="text" id="semester-input" value="2025-2026-2" placeholder="如 2025-2026-2" style="width:160px"/></li>
-                    </ul>
-                </div>
-            </form>
+        <div class="col-sm-12" style="margin-bottom:15px">
+            <a class="btn btn-primary" th:href="@{/student/index(sno=${sno})}"><i class="fa fa-arrow-left"></i> 返回首页</a>
         </div>
-        <div class="col-sm-12 select-table table-striped">
-            <table id="bootstrap-table"></table>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-search" style="color:#1c84c6;margin-right:8px;"></i>可选课程</h5>
+                </div>
+                <div class="ibox-content">
+                    <form id="course-form">
+                        <div class="select-list" style="margin-bottom:15px;">
+                            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+                                <li style="display:inline-flex;align-items:center;gap:6px;">
+                                    <label class="control-label" style="margin:0;font-weight:600;color:#2f4050;white-space:nowrap;">学期</label>
+                                    <input type="text" id="semester-input" value="2025-2026-2" placeholder="如 2025-2026-2" class="form-control" style="width:150px;display:inline-block;" />
+                                </li>
+                                <li style="display:inline-flex;align-items:center;gap:6px;">
+                                    <label class="control-label" style="margin:0;font-weight:600;color:#2f4050;white-space:nowrap;">课程名称</label>
+                                    <input type="text" id="search-cname" placeholder="请输入课程名称" class="form-control" style="width:160px;display:inline-block;" />
+                                </li>
+                                <li style="display:inline-flex;align-items:center;gap:6px;">
+                                    <label class="control-label" style="margin:0;font-weight:600;color:#2f4050;white-space:nowrap;">教师姓名</label>
+                                    <input type="text" id="search-tname" placeholder="请输入教师姓名" class="form-control" style="width:140px;display:inline-block;" />
+                                </li>
+                                <li style="display:inline-flex;align-items:center;gap:6px;">
+                                    <label class="control-label" style="margin:0;font-weight:600;color:#2f4050;white-space:nowrap;">课程类型</label>
+                                    <select id="search-courseType" class="form-control" style="width:100px;display:inline-block;">
+                                        <option value="">全部</option>
+                                        <option value="0">必修</option>
+                                        <option value="1">选修</option>
+                                    </select>
+                                </li>
+                                <li style="display:inline-flex;align-items:center;gap:6px;">
+                                    <label class="control-label" style="margin:0;font-weight:600;color:#2f4050;white-space:nowrap;">学分</label>
+                                    <select id="search-credit" class="form-control" style="width:100px;display:inline-block;">
+                                        <option value="">全部</option>
+                                        <option value="1">1学分</option>
+                                        <option value="2">2学分</option>
+                                        <option value="3">3学分</option>
+                                        <option value="4">4学分</option>
+                                    </select>
+                                </li>
+                                <li style="display:inline-flex;align-items:center;gap:8px;">
+                                    <a class="btn btn-primary btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i> 搜索</a>
+                                    <a class="btn btn-default btn-sm" onclick="resetSearch()"><i class="fa fa-refresh"></i> 重置</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -26,6 +67,20 @@ $(function() {
         url: ctx + "student/course/list",
         createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
         modalName: "课程", uniqueId: "cno",
+        queryParams: function(params) {
+            var search = {};
+            search.pageSize = params.limit;
+            search.pageNum = params.offset / params.limit + 1;
+            var cname = $("#search-cname").val();
+            if (cname) { search.cname = cname; }
+            var tname = $("#search-tname").val();
+            if (tname) { search.teacherName = tname; }
+            var courseType = $("#search-courseType").val();
+            if (courseType !== "") { search.courseType = courseType; }
+            var credit = $("#search-credit").val();
+            if (credit !== "") { search.creditMin = credit; search.creditMax = credit; }
+            return search;
+        },
         columns: [{field:'cno',title:'课程号'},{field:'cname',title:'课程名'},{field:'credit',title:'学分'},{field:'hours',title:'学时'},{field:'courseType',title:'类型',formatter:function(v){return v==0?'必修':'选修';}},{field:'deptName',title:'开课院系'},{field:'maxStudents',title:'名额',formatter:function(v,r){var e=r.enrolledCount||0;return e+'/'+v;}},{title:'操作',formatter:function(v,r){var cnoEnc=$.common.escapeHtml(r.cno),cnameEnc=$.common.escapeHtml(r.cname);return '<a class="btn btn-success btn-xs" href="#" onclick="selectCourse(\''+cnoEnc+'\',\''+cnameEnc+'\')">选课</a>';}}]
     };
     $.table.init(options);
@@ -38,7 +93,11 @@ function selectCourse(cno, cname) {
         $.ajax({ type: "POST", url: ctx + "student/course/select", data: {sno:sno, cno:cno, semester:sem}, success: function(r) { if (r.code == web_status.SUCCESS) { $.modal.msgSuccess(r.msg); $.table.refresh(); } else { $.modal.alertError(r.msg); } } });
     });
 }
+function resetSearch() {
+    $("#search-cname").val("");
+    $("#search-tname").val("");
+    $("#search-courseType").val("");
+    $("#search-credit").val("");
+    $.table.search();
+}
 </script></body></html>
-
-
-

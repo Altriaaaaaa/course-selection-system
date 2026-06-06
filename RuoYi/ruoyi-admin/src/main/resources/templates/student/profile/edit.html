@@ -1,14 +1,60 @@
-<!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('个人信息')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-8 col-sm-offset-2"><div class="ibox"><div class="ibox-content">
-<form class="form-horizontal m-t" id="profile-form">
-  <div class="form-group"><label class="col-sm-3 control-label">学号：</label><div class="col-sm-6"><input class="form-control" th:value="${student.sno}" readonly /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">姓名：</label><div class="col-sm-6"><input class="form-control" th:value="${student.sname}" readonly /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">院系：</label><div class="col-sm-6"><input class="form-control" th:value="${student.deptName}" readonly /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">电话：</label><div class="col-sm-6"><input class="form-control" name="phone" th:value="${student.phone}" /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">籍贯：</label><div class="col-sm-6"><input class="form-control" name="nativePlace" th:value="${student.nativePlace}" /></div></div>
-  <div class="form-group"><div class="col-sm-6 col-sm-offset-3"><button type="button" class="btn btn-primary" onclick="save()">保存</button></div></div>
-</form></div></div></div></div></div>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12" style="margin-bottom:15px">
+            <a class="btn btn-primary" th:href="@{/student/index(sno=${student.sno})}"><i class="fa fa-arrow-left"></i> 返回首页</a>
+        </div>
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-user" style="color:#1ab394;margin-right:8px;"></i>个人信息</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal m-t" id="profile-form">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-id-card" style="color:#1c84c6;margin-right:6px;"></i>学号</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" th:value="${student.sno}" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-user-circle" style="color:#1ab394;margin-right:6px;"></i>姓名</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" th:value="${student.sname}" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-building" style="color:#9b59b6;margin-right:6px;"></i>院系</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" th:value="${student.deptName}" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-phone" style="color:#f8ac59;margin-right:6px;"></i>电话</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" name="phone" th:value="${student.phone}" placeholder="请输入联系电话" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-map-marker" style="color:#ed5565;margin-right:6px;"></i>籍贯</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" name="nativePlace" th:value="${student.nativePlace}" placeholder="请输入籍贯" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-6 col-sm-offset-3">
+                                <button type="button" class="btn btn-primary" onclick="save()"><i class="fa fa-save"></i> 保存</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 function save(){var d=$('#profile-form').serialize();$.post(ctx+'student/profile/edit',d,function(r){if(r.code==0)$.modal.msgSuccess("保存成功");else $.modal.msgError(r.msg);});}

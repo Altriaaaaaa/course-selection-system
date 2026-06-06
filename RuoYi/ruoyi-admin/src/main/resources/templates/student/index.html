@@ -1,16 +1,127 @@
 ﻿<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('学生工作台')" /></head>
+<head><th:block th:include="include :: header('学生工作台')" />
+<style>
+.student-info-card p {
+    font-size: 14px;
+    color: #676a6c;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f2f5;
+    margin: 0;
+}
+.student-info-card p:last-child {
+    border-bottom: none;
+}
+.student-info-card p strong {
+    color: #2f4050;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 60px;
+}
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.quick-actions .action-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e7eaec;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #2f4050;
+    transition: all 0.2s ease;
+}
+.quick-actions .action-card:hover {
+    border-color: #1ab394;
+    box-shadow: 0 2px 8px rgba(26,179,148,0.12);
+    text-decoration: none;
+    color: #1ab394;
+}
+.quick-actions .action-card .action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+}
+.quick-actions .action-card .action-text {
+    font-size: 13px;
+    font-weight: 500;
+}
+.icon-green { background-color: #1ab394; }
+.icon-blue { background-color: #1c84c6; }
+.icon-orange { background-color: #f8ac59; }
+.icon-red { background-color: #ed5565; }
+.icon-purple { background-color: #9b59b6; }
+.icon-gray { background-color: #676a6c; }
+.bell-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.bell-wrapper .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: #ed5565;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
+}
+</style>
+</head>
 <body class="gray-bg">
-<div class="wrapper wrapper-content">
+<div class="wrapper wrapper-content" style="padding: 20px;">
 <div class="row">
-<div class="col-sm-4"><div class="ibox"><div class="ibox-title"><h5>学生信息</h5></div>
-<div class="ibox-content"><p>学号：<span id="info-sno"></span></p><p>姓名：<span id="info-name"></span></p></div></div></div>
-<div class="col-sm-8"><div class="ibox"><div class="ibox-title"><h5>快捷操作</h5></div>
+<div class="col-sm-4">
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-graduation-cap" style="color:#1ab394;margin-right:8px;"></i>学生信息</h5></div>
+<div class="ibox-content student-info-card">
+<p><strong>学号：</strong><span id="info-sno"></span></p>
+<p><strong>姓名：</strong><span id="info-name"></span></p>
+</div></div></div>
+<div class="col-sm-8">
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-rocket" style="color:#1ab394;margin-right:8px;"></i>快捷操作</h5></div>
 <div class="ibox-content">
-<a class="btn btn-primary" th:href="@{/student/course(sno=${param.sno})}">浏览可选课程</a>
-<a class="btn btn-success" th:href="@{/student/course/my(sno=${param.sno})}">我的选课</a>
-<a class="btn btn-info" th:href="@{/student/grade(sno=${param.sno})}">成绩查询</a> <a class="btn btn-warning" th:href="@{/student/schedule(sno=${param.sno})}">我的课表</a> <a class="btn btn-danger" th:href="@{/student/exam(sno=${param.sno})}">考试时间</a>
+<div class="quick-actions">
+<a class="action-card" th:href="@{/student/course(sno=${param.sno})}">
+<span class="action-icon icon-blue"><i class="fa fa-search"></i></span>
+<span class="action-text">浏览可选课程</span>
+</a>
+<a class="action-card" th:href="@{/student/course/my(sno=${param.sno})}">
+<span class="action-icon icon-green"><i class="fa fa-check-circle"></i></span>
+<span class="action-text">我的选课</span>
+</a>
+<a class="action-card" th:href="@{/student/grade(sno=${param.sno})}">
+<span class="action-icon icon-orange"><i class="fa fa-file-text-o"></i></span>
+<span class="action-text">成绩查询</span>
+</a>
+<a class="action-card" th:href="@{/student/schedule(sno=${param.sno})}">
+<span class="action-icon icon-purple"><i class="fa fa-calendar"></i></span>
+<span class="action-text">我的课表</span>
+</a>
+<a class="action-card" th:href="@{/student/exam(sno=${param.sno})}">
+<span class="action-icon icon-red"><i class="fa fa-clock-o"></i></span>
+<span class="action-text">考试时间</span>
+</a>
+<a class="action-card" th:href="@{/notification/list}">
+<span class="action-icon icon-gray"><i class="fa fa-bell-o"></i></span>
+<span class="action-text">
+消息中心
+<span id="unread-badge" class="badge" style="display:none;background-color:#ed5565;font-size:10px;padding:2px 5px;border-radius:10px;vertical-align:middle;margin-left:4px;"></span>
+</span>
+</a>
+</div>
 </div></div></div></div></div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">
@@ -19,6 +130,11 @@ $(function() {
     $.ajax({url: ctx + "student/info", type: "post", data: {sno: sno}, success: function(r) {
         if (r.code == 0 && r.data) { $("#info-sno").text(r.data.sno); $("#info-name").text(r.data.sname); }
     }});
+    $.get(ctx + "notification/unread-count", function(r) {
+        if (r.code == 0 && r.count > 0) {
+            $("#unread-badge").text(r.count).show();
+        }
+    });
 });
 </script></body></html>
 

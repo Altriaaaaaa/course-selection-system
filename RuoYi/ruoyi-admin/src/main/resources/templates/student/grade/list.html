@@ -1,7 +1,58 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('成绩查询')" /></head>
-<body class="gray-bg"><div class="container-div"><div id="gpa-section" style="text-align:right;font-size:20px;font-weight:bold;color:#e7505a;margin-bottom:10px;background:#f9f9f9;padding:8px 15px;border-radius:4px;"></div><div class="row"><div class="col-sm-12 select-table table-striped"><table id="bootstrap-table"></table></div></div></div>
+<style>
+.gpa-card {
+    background: linear-gradient(135deg, #1ab394 0%, #17a085 100%);
+    color: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(26,179,148,0.25);
+}
+.gpa-card .gpa-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+.gpa-card .gpa-value {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+.gpa-card .gpa-icon {
+    font-size: 48px;
+    opacity: 0.3;
+}
+</style>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12" style="margin-bottom:15px">
+            <a class="btn btn-primary" th:href="@{/student/index(sno=${sno})}"><i class="fa fa-arrow-left"></i> 返回首页</a>
+        </div>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-file-text-o" style="color:#f8ac59;margin-right:8px;"></i>成绩查询</h5>
+                </div>
+                <div class="ibox-content">
+                    <div id="gpa-section" class="gpa-card">
+                        <div>
+                            <div class="gpa-label">平均绩点 (GPA)</div>
+                            <div class="gpa-value">--</div>
+                        </div>
+                        <div class="gpa-icon"><i class="fa fa-trophy"></i></div>
+                    </div>
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">
 var sno = [[${sno}]];
@@ -14,6 +65,6 @@ $(function() {
         columns: [{field:'cno',title:'课程号'},{field:'cname',title:'课程名'},{field:'semester',title:'学期'},{field:'normalScore',title:'平时成绩'},{field:'testScore',title:'考试成绩'},{field:'total',title:'总评',formatter:function(v,r){if (r.normalScore && r.testScore) return (r.normalScore*0.4+r.testScore*0.6).toFixed(1);return '-';}}]
     };
     $.table.init(options);
-    $.get(ctx + "student/gpa", {sno:sno}, function(r) { if (r.code == 0) { document.getElementById("gpa-section").innerHTML = "平均绩点(GPA)：" + r.gpa.toFixed(2); } });
+    $.get(ctx + "student/gpa", {sno:sno}, function(r) { if (r.code == 0) { document.getElementById("gpa-section").innerHTML = '<div><div class="gpa-label">平均绩点 (GPA)</div><div class="gpa-value">' + r.gpa.toFixed(2) + '</div></div><div class="gpa-icon"><i class="fa fa-trophy"></i></div>'; } });
 });
 </script></body></html>

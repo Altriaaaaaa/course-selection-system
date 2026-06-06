@@ -18,6 +18,9 @@ public class Course
     private Integer enrolledCount;
     private Integer status;
     private String rejectReason;
+    private String teacherName;
+    private BigDecimal creditMin;
+    private BigDecimal creditMax;
 
     public String getCno() { return cno; }
     public void setCno(String cno) { this.cno = cno; }
@@ -54,6 +57,15 @@ public class Course
 
     public String getRejectReason() { return rejectReason; }
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
+
+    public String getTeacherName() { return teacherName; }
+    public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
+
+    public BigDecimal getCreditMin() { return creditMin; }
+    public void setCreditMin(BigDecimal creditMin) { this.creditMin = creditMin; }
+
+    public BigDecimal getCreditMax() { return creditMax; }
+    public void setCreditMax(BigDecimal creditMax) { this.creditMax = creditMax; }
 
     @Override
     public String toString() {

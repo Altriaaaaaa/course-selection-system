@@ -2,6 +2,20 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:include="include :: header('修改成绩')" />
+    <style>
+        .form-group { margin-bottom: 20px; }
+        .form-control {
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26,179,148,0.15);
+        }
+        .control-label { font-weight: 500; color: var(--secondary); }
+    </style>
 </head>
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">

@@ -19,6 +19,9 @@ import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.service.ConfigService;
+import com.ruoyi.common.utils.ShiroUtils;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.domain.entity.SysRole;
 
 /**
  * 登录验证
@@ -70,7 +73,26 @@ public class SysLoginController extends BaseController
         try
         {
             subject.login(token);
-            return success().put("homeUrl", "index");
+            // 根据角色决定跳转地址
+            String homeUrl = "index";
+            SysUser user = ShiroUtils.getSysUser();
+            if (user != null && user.getRoles() != null)
+            {
+                for (SysRole role : user.getRoles())
+                {
+                    if ("teacher".equals(role.getRoleKey()))
+                    {
+                        homeUrl = "teacher/index?tno=" + username;
+                        break;
+                    }
+                    else if ("student".equals(role.getRoleKey()))
+                    {
+                        homeUrl = "student/index?sno=" + username;
+                        break;
+                    }
+                }
+            }
+            return success().put("homeUrl", homeUrl);
         }
         catch (AuthenticationException e)
         {

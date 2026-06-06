@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:include="include :: header('临时换课')" /></head>
+<body class="gray-bg">
+<style>
+.page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.page-toolbar .btn-swap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.status-pending {
+    background-color: #fff8e6;
+    color: #c79520;
+    border: 1px solid #f5e0a0;
+}
+.status-approved {
+    background-color: #e8f8f5;
+    color: #1a8a6e;
+    border: 1px solid #a3e4d7;
+}
+.status-rejected {
+    background-color: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5b7b1;
+}
+</style>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-exchange"></i> 临时换课</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary btn-swap" onclick="showSwapForm()">
+                            <i class="fa fa-plus"></i> 申请换课
+                        </button>
+                    </div>
+                    <div class="select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+var tno = new URLSearchParams(window.location.search).get("tno") || "T2021001";
+$(function() {
+    var options = {
+        url: ctx + "teacher/swap/list",
+        createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
+        modalName: "换课申请", uniqueId: "swapId",
+        queryParams: function(params) { return {pageSize: params.limit, pageNum: params.offset / params.limit + 1, tno: tno}; },
+        columns: [
+            {field:'swapId',title:'编号'},
+            {field:'fromTname',title:'申请人'},
+            {field:'fromCname',title:'申请课程'},
+            {field:'toTname',title:'目标教师'},
+            {field:'toCname',title:'目标课程'},
+            {field:'swapWeek',title:'换课周次'},
+            {field:'reason',title:'原因'},
+            {field:'status',title:'状态',formatter:function(v){return v==0?'<span class="status-badge status-pending">待审批</span>':v==1?'<span class="status-badge status-approved">已批准</span>':'<span class="status-badge status-rejected">已拒绝</span>';}},
+            {title:'操作',formatter:function(v,r){
+                var html = '';
+                if(r.status==0 && r.toTno==tno){
+                    html += '<a class="btn btn-success btn-xs" href="#" onclick="approveSwap('+r.swapId+')">批准</a> ';
+                    html += '<a class="btn btn-danger btn-xs" href="#" onclick="rejectSwap('+r.swapId+')">拒绝</a>';
+                }
+                return html;
+            }}
+        ]
+    };
+    $.table.init(options);
+});
+
+function showSwapForm() {
+    $.ajax({url: ctx + "teacher/swap/available/teachers", type: "post", data: {tno: tno}, success: function(r) {
+        var teachers = r.data || [];
+        var teacherOpts = '';
+        for(var i=0; i<teachers.length; i++) {
+            teacherOpts += '<option value="'+teachers[i].tno+'">'+teachers[i].tname+' ('+teachers[i].tno+')</option>';
+        }
+        var html = '<div class="form-group"><label>我的课程</label><select id="swap-from-cno" class="form-control"><option value="">加载中...</option></select></div>';
+        html += '<div class="form-group"><label>目标教师</label><select id="swap-to-tno" class="form-control">'+teacherOpts+'</select></div>';
+        html += '<div class="form-group"><label>目标教师课程</label><select id="swap-to-cno" class="form-control"><option value="">请先选择目标教师</option></select></div>';
+        html += '<div class="form-group"><label>换课周次</label><input id="swap-week" class="form-control" placeholder="如：第15周"/></div>';
+        html += '<div class="form-group"><label>换课原因</label><textarea id="swap-reason" class="form-control" rows="3" placeholder="请说明换课原因"></textarea></div>';
+        layer.open({type:1, title:'申请换课', area:['500px','520px'], content:'<div class="p-sm">'+html+'</div>', btn:['提交','取消'],
+            yes: function(idx) {
+                var fromCno = $("#swap-from-cno").val();
+                var toTno = $("#swap-to-tno").val();
+                var toCno = $("#swap-to-cno").val();
+                var swapWeek = $("#swap-week").val();
+                var reason = $("#swap-reason").val();
+                if(!fromCno||!toTno||!toCno||!swapWeek) { layer.msg('请填写完整信息'); return; }
+                $.ajax({type:"POST", url:ctx+"teacher/swap/request", data:{fromTno:tno, fromCno:fromCno, toTno:toTno, toCno:toCno, swapWeek:swapWeek, reason:reason},
+                    success:function(r){ if(r.code==0){layer.close(idx);$.modal.msgSuccess(r.msg);$.table.refresh();}else{$.modal.alertError(r.msg);} }
+                });
+            }
+        });
+        // 加载当前教师的课程
+        $.ajax({url: ctx + "teacher/course/list", type: "post", data: {tno: tno, pageSize: 100, pageNum: 1}, success: function(r2) {
+            var rows = r2.rows || [];
+            var opts = '';
+            for(var j=0; j<rows.length; j++) { opts += '<option value="'+rows[j].cno+'">'+rows[j].cname+' ('+rows[j].cno+')</option>'; }
+            $("#swap-from-cno").html(opts);
+        }});
+        // 加载目标教师课程
+        $("#swap-to-tno").on('change', function() {
+            var selTno = $(this).val();
+            $.ajax({url: ctx + "teacher/course/list", type: "post", data: {tno: selTno, pageSize: 100, pageNum: 1}, success: function(r3) {
+                var rows = r3.rows || [];
+                var opts = '';
+                for(var k=0; k<rows.length; k++) { opts += '<option value="'+rows[k].cno+'">'+rows[k].cname+' ('+rows[k].cno+')</option>'; }
+                $("#swap-to-cno").html(opts);
+            }});
+        });
+    }});
+}
+
+function approveSwap(swapId) {
+    $.modal.confirm("确认批准该换课申请？批准后将交换课程时间安排。", function() {
+        $.ajax({type:"POST", url:ctx+"teacher/swap/approve", data:{swapId:swapId}, success:function(r){
+            if(r.code==0){$.modal.msgSuccess(r.msg);$.table.refresh();}else{$.modal.alertError(r.msg);}
+        }});
+    });
+}
+
+function rejectSwap(swapId) {
+    $.modal.confirm("确认拒绝该换课申请？", function() {
+        $.ajax({type:"POST", url:ctx+"teacher/swap/reject", data:{swapId:swapId}, success:function(r){
+            if(r.code==0){$.modal.msgSuccess(r.msg);$.table.refresh();}else{$.modal.alertError(r.msg);}
+        }});
+    });
+}
+</script></body></html>

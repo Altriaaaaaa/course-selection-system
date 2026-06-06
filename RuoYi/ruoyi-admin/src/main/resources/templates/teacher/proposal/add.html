@@ -1,14 +1,69 @@
-<!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('新增开课申请')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-8 col-sm-offset-2"><div class="ibox"><div class="ibox-content">
-<form class="form-horizontal m-t" id="proposal-form">
-  <div class="form-group"><label class="col-sm-3 control-label">课程名：</label><div class="col-sm-6"><input class="form-control" name="cname" required /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">学分：</label><div class="col-sm-6"><input class="form-control" name="credit" required /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">学时：</label><div class="col-sm-6"><input class="form-control" name="hours" required /></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">类型：</label><div class="col-sm-6"><select class="form-control" name="courseType"><option value="0">必修</option><option value="1">选修</option></select></div></div>
-  <div class="form-group"><label class="col-sm-3 control-label">最大容量：</label><div class="col-sm-6"><input class="form-control" name="maxStudents" /></div></div>
-  <div class="form-group"><div class="col-sm-6 col-sm-offset-3"><button type="button" class="btn btn-primary" onclick="submit()">提交申请</button></div></div>
-</form></div></div></div></div></div>
+<body class="gray-bg">
+<style>
+.form-page .ibox-title h5 i {
+    margin-right: 6px;
+}
+.form-page .form-group label {
+    font-weight: 600;
+    color: var(--secondary);
+}
+.form-page .form-group label .field-icon {
+    margin-right: 6px;
+    color: var(--primary);
+    width: 16px;
+    text-align: center;
+}
+.btn-submit {
+    padding: 8px 28px;
+    font-size: 14px;
+    font-weight: 600;
+}
+</style>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="ibox float-e-margins form-page">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-file-text-o"></i> 新增开课申请</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal m-t" id="proposal-form">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-book field-icon"></i>课程名：</label>
+                            <div class="col-sm-6"><input class="form-control" name="cname" required /></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-graduation-cap field-icon"></i>学分：</label>
+                            <div class="col-sm-6"><input class="form-control" name="credit" required /></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-clock-o field-icon"></i>学时：</label>
+                            <div class="col-sm-6"><input class="form-control" name="hours" required /></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-tags field-icon"></i>类型：</label>
+                            <div class="col-sm-6"><select class="form-control" name="courseType"><option value="0">必修</option><option value="1">选修</option></select></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><i class="fa fa-users field-icon"></i>最大容量：</label>
+                            <div class="col-sm-6"><input class="form-control" name="maxStudents" /></div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-6 col-sm-offset-3">
+                                <button type="button" class="btn btn-primary btn-submit" onclick="submit()">
+                                    <i class="fa fa-check"></i> 提交申请
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 function submit(){var d=$('#proposal-form').serialize();

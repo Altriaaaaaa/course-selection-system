@@ -1,9 +1,39 @@
 <!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('安全审计')" /></head>
+<head><th:block th:include="include :: header('安全审计')" />
+<style>
+    .security-stat-card {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        padding: 24px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+    .security-stat-card .stat-title {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    .security-stat-card .stat-number {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--danger);
+        line-height: 1.2;
+    }
+</style>
+</head>
 <body class="gray-bg"><div class="container-div">
-<div class="row"><div class="col-sm-4"><div class="ibox"><div class="ibox-title"><h5>今日登录异常</h5></div>
-<div class="ibox-content" style="text-align:center;font-size:48px;color:#e7505a" id="fail-count">--</div></div></div>
-<div class="col-sm-12 select-table table-striped"><table id="bootstrap-table"></table></div></div></div>
+<div class="row">
+<div class="col-sm-4">
+    <div class="security-stat-card">
+        <div class="stat-title">今日登录异常</div>
+        <div class="stat-number" id="fail-count">--</div>
+    </div>
+</div>
+<div class="col-sm-12 select-table table-striped"><table id="bootstrap-table"></table></div>
+</div></div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){

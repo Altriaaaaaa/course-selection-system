@@ -99,6 +99,47 @@ public class StatisticsController extends BaseController
         return getDataTable(list);
     }
 
+    /** 选课概览 - 总览统计数据 */
+    @RequestMapping("/overview")
+    @ResponseBody
+    public AjaxResult overview()
+    {
+        try {
+            Map<String, Object> result = new java.util.HashMap<>();
+            // 总课程数
+            Integer totalCourses = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM course", Integer.class);
+            result.put("totalCourses", totalCourses != null ? totalCourses : 0);
+            // 总学生数
+            Integer totalStudents = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM student", Integer.class);
+            result.put("totalStudents", totalStudents != null ? totalStudents : 0);
+            // 总选课人次
+            Integer totalEnrollments = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM courseselection", Integer.class);
+            result.put("totalEnrollments", totalEnrollments != null ? totalEnrollments : 0);
+            // 平均GPA - 计算所有有成绩学生的平均绩点
+            Double avgGpa = jdbcTemplate.queryForObject(
+                "SELECT AVG(gpa) FROM (SELECT cs.sno, " +
+                "SUM(CASE WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 90 THEN 4.0 " +
+                "WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 85 THEN 3.7 WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 82 THEN 3.3 " +
+                "WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 78 THEN 3.0 WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 75 THEN 2.7 " +
+                "WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 72 THEN 2.3 WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 68 THEN 2.0 " +
+                "WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 64 THEN 1.5 WHEN (cs.normal_score*0.4+cs.test_score*0.6) >= 60 THEN 1.0 " +
+                "ELSE 0 END) * c.credit / NULLIF(SUM(c.credit), 0) AS gpa " +
+                "FROM courseselection cs JOIN course c ON cs.cno = c.cno " +
+                "WHERE cs.normal_score IS NOT NULL AND cs.test_score IS NOT NULL AND (cs.normal_score*0.4+cs.test_score*0.6) >= 60 " +
+                "GROUP BY cs.sno, c.cno, c.credit) t", Double.class);
+            result.put("avgGpa", avgGpa != null ? Math.round(avgGpa * 100.0) / 100.0 : 0);
+            // 各课程选课人数列表
+            List<Map<String, Object>> courseEnrollList = jdbcTemplate.queryForList(
+                "SELECT c.cname, COUNT(*) AS enrolledCount FROM courseselection cs " +
+                "JOIN course c ON cs.cno = c.cno GROUP BY cs.cno, c.cname ORDER BY enrolledCount DESC");
+            result.put("courseEnrollList", courseEnrollList);
+            return success(result);
+        } catch (Exception e) {
+            logger.error("获取选课概览数据失败", e);
+            return error("获取选课概览数据失败");
+        }
+    }
+
     /** 安全概览 - 今日登录失败统计 */
     @RequestMapping("/security/todayFails")
     @ResponseBody

@@ -1,18 +1,65 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:include="include :: header('学生成绩录入')" />
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row">
-            <div class="col-sm-12" style="margin-bottom:8px"><a class="btn btn-success" th:href="@{/teacher/course/students/export(cno=${param.cno})}">导出 Excel</a></div><div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table"></table>
+<style>
+.page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.page-toolbar .btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.grade-modal .form-group {
+    margin-bottom: 16px;
+}
+.grade-modal .form-group label {
+    font-weight: 600;
+    color: var(--secondary);
+    margin-bottom: 6px;
+    display: block;
+    font-size: 13px;
+}
+.grade-modal .student-info {
+    padding: 10px 14px;
+    background: var(--bg-gray);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+.grade-modal .student-info b {
+    color: var(--secondary);
+}
+</style>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-pencil-square-o"></i> 学生成绩录入</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="page-toolbar">
+                        <a class="btn btn-success btn-export" th:href="@{/teacher/course/students/export(cno=${param.cno})}">
+                            <i class="fa fa-download"></i> 导出 Excel
+                        </a>
+                    </div>
+                    <div class="select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <th:block th:include="include :: footer" />
-    <script th:inline="javascript">
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
 var cno = new URLSearchParams(window.location.search).get("cno");
 $(function() {
     var options = {
@@ -40,13 +87,13 @@ $(function() {
 });
 
 function editGrade(sno, sname, ns, ts) {
-    var html = '<div style="padding:15px">';
-    html += '<p><b>' + sname + '</b>（' + sno + '）</p>';
+    var html = '<div class="grade-modal" style="padding:15px">';
+    html += '<div class="student-info"><b>' + sname + '</b>（' + sno + '）</div>';
     html += '<div class="form-group"><label>平时成绩（40%）</label><input id="input-ns" class="form-control" type="number" step="0.1" min="0" max="100" value="'+(ns||'')+'"></div>';
     html += '<div class="form-group"><label>考试成绩（60%）</label><input id="input-ts" class="form-control" type="number" step="0.1" min="0" max="100" value="'+(ts||'')+'"></div>';
     html += '</div>';
     layer.open({
-        type: 1, title: '编辑成绩', area: ['400px','320px'],
+        type: 1, title: '编辑成绩', area: ['400px','340px'],
         content: html,
         btn: ['保存', '取消'],
         yes: function(index) {
@@ -70,6 +117,6 @@ function editGrade(sno, sname, ns, ts) {
         }
     });
 }
-    </script>
+</script>
 </body>
 </html>

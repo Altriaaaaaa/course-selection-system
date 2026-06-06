@@ -1,36 +1,187 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('我的课表')" /></head>
 <body class="gray-bg">
 <div class="container-div">
     <div class="row">
-        <div class="col-sm-12 select-table table-striped">
-            <table id="bootstrap-table"></table>
+        <div class="col-sm-12" style="margin-bottom:15px">
+            <a class="btn btn-primary" th:href="@{/student/index(sno=${sno})}"><i class="fa fa-arrow-left"></i> 返回首页</a>
+        </div>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-calendar" style="color:#1ab394;margin-right:8px;"></i>我的课表</h5>
+                </div>
+                <div class="ibox-content">
+                    <div id="schedule-loading" style="text-align:center;padding:40px;">
+                        <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                        <span style="font-size:16px;">加载课表中...</span>
+                    </div>
+                    <table id="schedule-table" class="table table-bordered table-hover" style="display:none;">
+                        <thead>
+                            <tr style="background-color:#eef2f7;">
+                                <th style="width:100px;text-align:center;vertical-align:middle;">节次</th>
+                                <th style="text-align:center;vertical-align:middle;">周一</th>
+                                <th style="text-align:center;vertical-align:middle;">周二</th>
+                                <th style="text-align:center;vertical-align:middle;">周三</th>
+                                <th style="text-align:center;vertical-align:middle;">周四</th>
+                                <th style="text-align:center;vertical-align:middle;">周五</th>
+                                <th style="text-align:center;vertical-align:middle;">周六</th>
+                                <th style="text-align:center;vertical-align:middle;">周日</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align:center;vertical-align:middle;font-weight:bold;">第1-2节</td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周一" data-slot="1"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周二" data-slot="1"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周三" data-slot="1"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周四" data-slot="1"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周五" data-slot="1"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周六" data-slot="1"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周日" data-slot="1"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center;vertical-align:middle;font-weight:bold;">第3-4节</td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周一" data-slot="2"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周二" data-slot="2"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周三" data-slot="2"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周四" data-slot="2"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周五" data-slot="2"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周六" data-slot="2"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周日" data-slot="2"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center;vertical-align:middle;font-weight:bold;">第5-6节</td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周一" data-slot="3"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周二" data-slot="3"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周三" data-slot="3"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周四" data-slot="3"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周五" data-slot="3"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周六" data-slot="3"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周日" data-slot="3"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center;vertical-align:middle;font-weight:bold;">第7-8节</td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周一" data-slot="4"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周二" data-slot="4"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周三" data-slot="4"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周四" data-slot="4"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周五" data-slot="4"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周六" data-slot="4"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周日" data-slot="4"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center;vertical-align:middle;font-weight:bold;">第9-10节</td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周一" data-slot="5"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周二" data-slot="5"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周三" data-slot="5"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周四" data-slot="5"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周五" data-slot="5"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周六" data-slot="5"></td>
+                                <td style="height:80px;vertical-align:top;padding:4px;" data-day="周日" data-slot="5"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">
 var sno = [[${sno}]];
-$(function() {
-    var options = {
+
+function getSlot(startNum) {
+    if (startNum >= 1 && startNum <= 2) return 1;
+    if (startNum >= 3 && startNum <= 4) return 2;
+    if (startNum >= 5 && startNum <= 6) return 3;
+    if (startNum >= 7 && startNum <= 8) return 4;
+    if (startNum >= 9 && startNum <= 10) return 5;
+    return null;
+}
+
+function parseClassTime(classTime) {
+    if (!classTime) return [];
+    var results = [];
+    var parts = classTime.split(/\s+/);
+    var i = 0;
+    while (i < parts.length) {
+        var part = parts[i];
+        var dayMatch = part.match(/^(周[一二三四五六日])/);
+        if (dayMatch) {
+            var day = dayMatch[1];
+            var timeStr = parts[i + 1] || '';
+            var numMatch = timeStr.match(/(\d+)-(\d+)节/);
+            if (numMatch) {
+                var startNum = parseInt(numMatch[1]);
+                var endNum = parseInt(numMatch[2]);
+                var slot = getSlot(startNum);
+                if (slot) {
+                    results.push({day: day, slot: slot, timeStr: startNum + '-' + endNum + '节'});
+                }
+                i += 2;
+                continue;
+            }
+        }
+        i++;
+    }
+    return results;
+}
+
+function loadSchedule() {
+    $.ajax({
+        type: "POST",
         url: ctx + "student/schedule/list",
-        createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
-        modalName: "课表", uniqueId: "cno",
-        queryParams: function(params) {
-            return {pageSize: params.limit, pageNum: params.offset / params.limit + 1, sno: sno};
+        data: {sno: sno, pageSize: 999, pageNum: 1},
+        success: function(result) {
+            $("#schedule-loading").hide();
+            $("#schedule-table").show();
+            if (result.code == web_status.SUCCESS && result.rows) {
+                var rows = result.rows;
+                for (var i = 0; i < rows.length; i++) {
+                    var course = rows[i];
+                    var cname = course.cname || '';
+                    var classTime = course.classTime || '';
+                    var teacherName = course.teacherName || '';
+                    var parsedList = parseClassTime(classTime);
+                    for (var j = 0; j < parsedList.length; j++) {
+                        var p = parsedList[j];
+                        var cell = $('td[data-day="' + p.day + '"][data-slot="' + p.slot + '"]');
+                        if (cell.length > 0) {
+                            var colors = ['success', 'info', 'warning', 'primary', 'danger'];
+                            var colorIdx = i % colors.length;
+                            var colorClass = colors[colorIdx];
+                            var html = '<div class="alert alert-' + colorClass + ' schedule-cell" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;">';
+                            html += '<strong>' + $.common.escapeHtml(cname) + '</strong>';
+                            html += '<br/><small>' + $.common.escapeHtml(p.timeStr);
+                            if (teacherName) html += ' | ' + $.common.escapeHtml(teacherName);
+                            html += '</small>';
+                            html += '</div>';
+                            cell.append(html);
+                        }
+                    }
+                }
+            }
         },
-        columns: [
-            {field:'cno',title:'课程号'},
-            {field:'cname',title:'课程名'},
-            {field:'credit',title:'学分'},
-            {field:'teacherName',title:'授课教师'},
-            {field:'classTime',title:'上课时间'},
-            {field:'semester',title:'学期'}
-        ]
-    };
-    $.table.init(options);
+        error: function() {
+            $("#schedule-loading").html('<span style="color:red;">加载失败，请刷新重试</span>');
+        }
+    });
+}
+
+$(function() {
+    loadSchedule();
 });
-</script></body></html>
-
-
+</script>
+<style>
+.schedule-cell {
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: break-all;
+}
+#schedule-table td[data-day] {
+    min-width: 100px;
+}
+</style>
+</body></html>

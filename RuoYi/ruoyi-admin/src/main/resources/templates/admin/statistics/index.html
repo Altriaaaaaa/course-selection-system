@@ -1,19 +1,159 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('统计分析')" /></head>
+<head><th:block th:include="include :: header('统计分析')" /><th:block th:include="include :: echarts-js" />
+<style>
+    /* Tab 标签样式优化 */
+    .nav-tabs-custom > .nav-tabs > li {
+        border-top: 3px solid transparent;
+        margin-right: 2px;
+    }
+    .nav-tabs-custom > .nav-tabs > li > a {
+        color: var(--secondary);
+        font-weight: 500;
+        border-radius: var(--radius) var(--radius) 0 0;
+        padding: 10px 20px;
+        transition: all 0.2s ease;
+    }
+    .nav-tabs-custom > .nav-tabs > li > a:hover {
+        color: var(--primary);
+        border-top-color: var(--primary);
+    }
+    .nav-tabs-custom > .nav-tabs > li.active {
+        border-top: 3px solid var(--primary);
+    }
+    .nav-tabs-custom > .nav-tabs > li.active > a,
+    .nav-tabs-custom > .nav-tabs > li.active > a:hover,
+    .nav-tabs-custom > .nav-tabs > li.active > a:focus {
+        color: var(--primary);
+        border-top-color: var(--primary);
+        border-left-color: var(--border-color);
+        border-right-color: var(--border-color);
+    }
+
+    /* 统计卡片样式 */
+    .stat-card {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid var(--border-color);
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .stat-card .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #fff;
+        margin-bottom: 12px;
+    }
+    .stat-card .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 4px;
+    }
+    .stat-card .stat-label {
+        font-size: 13px;
+        color: #999;
+    }
+
+    /* 安全概览卡片 */
+    .security-card {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 24px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+    }
+    .security-card .sec-value {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--danger);
+        line-height: 1.2;
+    }
+    .security-card .sec-label {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+    }
+
+    /* 成绩查询区域 */
+    .grade-search-area {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        border: 1px solid var(--border-color);
+    }
+    .grade-search-area input[type="text"] {
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        padding: 6px 12px;
+        transition: border-color 0.2s;
+    }
+    .grade-search-area input[type="text"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(26,179,148,0.15);
+        outline: none;
+    }
+</style>
+</head>
 <body class="gray-bg">
 <div class="container-div">
     <div class="row">
         <div class="col-sm-12">
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#tab-enroll">选课统计</a></li>
+                    <li class="active"><a data-toggle="tab" href="#tab-overview">选课概览</a></li>
+                    <li><a data-toggle="tab" href="#tab-enroll">选课统计</a></li>
                     <li><a data-toggle="tab" href="#tab-fail">不及格名单</a></li>
                     <li><a data-toggle="tab" href="#tab-grades">成绩排名</a></li>
                     <li><a data-toggle="tab" href="#tab-security">安全概览</a></li>
                 </ul>
                 <div class="tab-content">
-                    <div id="tab-enroll" class="tab-pane active">
+                    <div id="tab-overview" class="tab-pane active">
+                        <div class="row" style="margin-bottom:20px;">
+                            <div class="col-sm-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background:var(--primary);"><i class="fa fa-book"></i></div>
+                                    <div class="stat-value" id="stat-totalCourses" style="color:var(--primary);">-</div>
+                                    <div class="stat-label">总课程数</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background:var(--info);"><i class="fa fa-users"></i></div>
+                                    <div class="stat-value" id="stat-totalStudents" style="color:var(--info);">-</div>
+                                    <div class="stat-label">总学生数</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background:var(--warning);"><i class="fa fa-pencil-square-o"></i></div>
+                                    <div class="stat-value" id="stat-totalEnrollments" style="color:var(--warning);">-</div>
+                                    <div class="stat-label">总选课人次</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background:var(--danger);"><i class="fa fa-star"></i></div>
+                                    <div class="stat-value" id="stat-avgGpa" style="color:var(--danger);">-</div>
+                                    <div class="stat-label">平均GPA</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row"><div class="col-sm-12"><div class="ibox"><div class="ibox-title"><h5>各课程选课人数对比</h5></div><div class="ibox-content"><div id="enroll-chart" style="width:100%;height:400px;"></div></div></div></div></div>
+                    </div>
+                    <div id="tab-enroll" class="tab-pane">
                         <div class="row"><div class="col-sm-12 select-table table-striped"><table id="enroll-table"></table></div></div>
                     </div>
                     <div id="tab-fail" class="tab-pane">
@@ -21,7 +161,7 @@
                     </div>
                     <div id="tab-grades" class="tab-pane">
                         <div class="row">
-                            <div class="col-sm-12 search-collapse">
+                            <div class="col-sm-12 grade-search-area">
                                 <form id="grade-form">
                                     <div class="select-list"><ul>
                                         <li>学号: <input type="text" id="sno-input" placeholder="输入学号查询"/></li>
@@ -31,13 +171,18 @@
                             </div>
                             <div class="col-sm-12 select-table table-striped">
                                 <table id="grade-table"></table>
-                                <div id="gpa-display" style="margin-top:15px;font-size:16px;font-weight:bold;color:#e10e1e;"></div>
+                                <div id="gpa-display" style="margin-top:15px;font-size:16px;font-weight:bold;color:var(--danger);"></div>
                             </div>
                         </div>
                     </div>
                     <div id="tab-security" class="tab-pane">
                         <div class="row">
-                            <div class="col-sm-3"><div class="card"><div class="card-body text-center"><h2 id="fail-count" style="color:#e10e1e;">-</h2><p>今日登录失败</p></div></div></div>
+                            <div class="col-sm-3">
+                                <div class="security-card">
+                                    <div class="sec-value" id="fail-count">-</div>
+                                    <div class="sec-label">今日登录失败</div>
+                                </div>
+                            </div>
                             <div class="col-sm-9 select-table table-striped">
                                 <table id="security-table"></table>
                             </div>
@@ -51,6 +196,9 @@
 <th:block th:include="include :: footer" />
 <script>
 $(function() {
+    // 加载选课概览数据
+    loadOverview();
+
     var enrollOptions = {
         url: ctx + "admin/statistics/enrollment",
         createUrl: undefined, updateUrl: undefined, removeUrl: undefined, search: false,
@@ -71,7 +219,7 @@ $(function() {
     var failOptions = {
         url: ctx + "admin/statistics/fail",
         createUrl: undefined, updateUrl: undefined, removeUrl: undefined, search: false,
-        modalName: "不及檡名单", uniqueId: "sno",
+        modalName: "不及格名单", uniqueId: "sno",
         columns: [
             {field:"sno",title:"学号"},
             {field:"sname",title:"姓名"},
@@ -128,7 +276,42 @@ function queryGrades() {
     $("#grade-table").bootstrapTable("destroy").bootstrapTable(gradeOptions);
     $.get(ctx + "admin/statistics/gpa", {sno:sno}, function(r) {
         if (r.code == 0) {
-            document.getElementById("gpa-display").innerHTML = "平均纣点(GPA)：" + Number(r.gpa).toFixed(2);
+            document.getElementById("gpa-display").innerHTML = "平均绩点(GPA)：" + Number(r.gpa).toFixed(2);
+        }
+    });
+}
+
+function loadOverview() {
+    $.get(ctx + "admin/statistics/overview", function(r) {
+        if (r.code == 0 && r.data) {
+            $("#stat-totalCourses").text(r.data.totalCourses);
+            $("#stat-totalStudents").text(r.data.totalStudents);
+            $("#stat-totalEnrollments").text(r.data.totalEnrollments);
+            $("#stat-avgGpa").text(r.data.avgGpa);
+            // 渲染柱状图
+            var courseList = r.data.courseEnrollList || [];
+            var names = [];
+            var counts = [];
+            for (var i = 0; i < courseList.length; i++) {
+                names.push(courseList[i].cname);
+                counts.push(courseList[i].enrolledCount);
+            }
+            var chart = echarts.init(document.getElementById("enroll-chart"));
+            var option = {
+                tooltip: {trigger: 'axis'},
+                grid: {left: '3%', right: '4%', bottom: '15%', containLabel: true},
+                xAxis: {type: 'category', data: names, axisLabel: {rotate: 30, interval: 0}},
+                yAxis: {type: 'value', name: '选课人数'},
+                series: [{
+                    name: '选课人数',
+                    type: 'bar',
+                    data: counts,
+                    itemStyle: {color: '#1ab394'},
+                    barMaxWidth: 40
+                }]
+            };
+            chart.setOption(option);
+            $(window).resize(function() { chart.resize(); });
         }
     });
 }

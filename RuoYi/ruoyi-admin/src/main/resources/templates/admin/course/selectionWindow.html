@@ -1,13 +1,51 @@
 <!DOCTYPE html><html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('选课时间设置')" /></head>
-<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12"><div class="ibox"><div class="ibox-content">
-<form class="form-horizontal m-t" id="window-form">
+<head><th:block th:include="include :: header('选课时间设置')" />
+<style>
+    .window-card {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        padding: 32px;
+        max-width: 600px;
+        margin: 20px auto;
+    }
+    .window-card .form-group { margin-bottom: 20px; }
+    .window-card .form-control {
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        transition: border-color 0.2s;
+    }
+    .window-card .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(26,179,148,0.15);
+    }
+    .window-card .control-label { font-weight: 500; color: var(--secondary); }
+    .window-card .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        padding: 8px 24px;
+        border-radius: var(--radius);
+    }
+    .window-card .btn-primary:hover {
+        background-color: #18a689;
+        border-color: #18a689;
+    }
+</style>
+</head>
+<body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12">
+<div class="window-card">
+    <h4 style="margin:0 0 20px;color:var(--secondary);font-weight:600;">选课时间窗口设置</h4>
+    <form class="form-horizontal" id="window-form">
   <div class="form-group"><label class="col-sm-3 control-label">选课开始时间：</label><div class="col-sm-6">
     <input class="form-control time-input" type="text" id="startTime" data-type="datetime" data-format="yyyy-MM-dd HH:mm:ss" /></div></div>
   <div class="form-group"><label class="col-sm-3 control-label">选课结束时间：</label><div class="col-sm-6">
     <input class="form-control time-input" type="text" id="endTime" data-type="datetime" data-format="yyyy-MM-dd HH:mm:ss" /></div></div>
-  <div class="form-group"><div class="col-sm-6 col-sm-offset-3"><button type="button" class="btn btn-primary" onclick="save()">保存</button></div></div>
-</form></div></div></div></div></div>
+  <div class="form-group"><div class="col-sm-6 col-sm-offset-3"><button type="button" class="btn btn-primary" onclick="save()">保存设置</button></div></div>
+</form>
+</div>
+</div></div></div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 function save(){

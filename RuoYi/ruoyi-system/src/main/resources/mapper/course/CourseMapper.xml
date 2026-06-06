@@ -17,11 +17,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="enrolledCount" column="enrolled_count"/>
         <result property="status"       column="status"       />
         <result property="rejectReason" column="reject_reason"/>
+        <result property="teacherName" column="teacherName"/>
     </resultMap>
 
     <sql id="selectCourseVo">
-        select c.cno, c.cname, c.credit, c.hours, c.course_type, c.dept_id, c.admin_id, d.dept_name, c.max_students, c.status, c.reject_reason, (select count(*) from courseselection cs2 where cs2.cno = c.cno) as enrolled_count
-        from course c left join department d on c.dept_id = d.dept_id
+        select c.cno, c.cname, c.credit, c.hours, c.course_type, c.dept_id, c.admin_id, d.dept_name, c.max_students, (select count(*) from courseselection cs2 where cs2.cno = c.cno) as enrolled_count, t.tname as teacherName
+        from course c left join department d on c.dept_id = d.dept_id left join class cl on c.cno = cl.cno left join teacher t on cl.tno = t.tno
     </sql>
 
     <select id="selectCourseList" parameterType="Course" resultMap="CourseResult">
@@ -33,13 +34,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="cname != null and cname != ''">
                 and c.cname like concat('%', #{cname}, '%')
             </if>
-            <if test="courseType != null"> and c.course_type = #{courseType}</if> 
+            <if test="courseType != null"> and c.course_type = #{courseType}</if>
             <if test="deptId != null and deptId != 0">
                 and c.dept_id = #{deptId}
             </if>
-            <if test="status != null"> and c.status = #{status}</if>
             <if test="adminId != null and adminId != ''"> and c.admin_id = #{adminId}</if>
+            <if test="teacherName != null and teacherName != ''">and t.tname like concat('%', #{teacherName}, '%')</if>
+            <if test="creditMin != null">and c.credit &gt;= #{creditMin}</if>
+            <if test="creditMax != null">and c.credit &lt;= #{creditMax}</if>
         </where>
+        group by c.cno, c.cname, c.credit, c.hours, c.course_type, c.dept_id, c.admin_id, d.dept_name, c.max_students, t.tname
         order by c.cno
     </select>
 
@@ -69,7 +73,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deptId != null">dept_id,</if>
             <if test="adminId != null and adminId != ''">admin_id,</if>
             <if test="maxStudents != null">max_students,</if>
-            <if test="status != null">status,</if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -81,7 +84,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deptId != null">#{deptId},</if>
             <if test="adminId != null and adminId != ''">#{adminId},</if>
             <if test="maxStudents != null">#{maxStudents},</if>
-            <if test="status != null">#{status},</if>
         </trim>
     </insert>
 
@@ -94,8 +96,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="courseType != null">course_type = #{courseType},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="maxStudents != null">max_students = #{maxStudents},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
         </set>
         where cno = #{cno}
     </update>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CourseSwapMapper">
+    <resultMap type="com.ruoyi.system.domain.CourseSwap" id="CourseSwapResult">
+        <id property="swapId" column="swap_id"/>
+        <result property="fromTno" column="from_tno"/>
+        <result property="fromCno" column="from_cno"/>
+        <result property="toTno" column="to_tno"/>
+        <result property="toCno" column="to_cno"/>
+        <result property="swapWeek" column="swap_week"/>
+        <result property="reason" column="reason"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="fromTname" column="from_tname"/>
+        <result property="fromCname" column="from_cname"/>
+        <result property="toTname" column="to_tname"/>
+        <result property="toCname" column="to_cname"/>
+    </resultMap>
+
+    <sql id="selectCourseSwapVo">
+        select cs.swap_id, cs.from_tno, cs.from_cno, cs.to_tno, cs.to_cno, cs.swap_week,
+               cs.reason, cs.status, cs.created_at, cs.updated_at,
+               ft.tname as from_tname, fc.cname as from_cname,
+               tt.tname as to_tname, tc.cname as to_cname
+        from course_swap cs
+        left join teacher ft on cs.from_tno = ft.tno
+        left join teacher tt on cs.to_tno = tt.tno
+        left join course fc on cs.from_cno = fc.cno
+        left join course tc on cs.to_cno = tc.cno
+    </sql>
+
+    <select id="selectCourseSwapList" parameterType="com.ruoyi.system.domain.CourseSwap" resultMap="CourseSwapResult">
+        <include refid="selectCourseSwapVo"/>
+        <where>
+            <if test="fromTno != null and fromTno != ''">and cs.from_tno = #{fromTno}</if>
+            <if test="toTno != null and toTno != ''">and cs.to_tno = #{toTno}</if>
+            <if test="status != null">and cs.status = #{status}</if>
+        </where>
+        order by cs.created_at desc
+    </select>
+
+    <select id="selectCourseSwapById" parameterType="int" resultMap="CourseSwapResult">
+        <include refid="selectCourseSwapVo"/> where cs.swap_id = #{swapId}
+    </select>
+
+    <insert id="insertCourseSwap" parameterType="com.ruoyi.system.domain.CourseSwap" useGeneratedKeys="true" keyProperty="swapId">
+        insert into course_swap (from_tno, from_cno, to_tno, to_cno, swap_week, reason, status)
+        values (#{fromTno}, #{fromCno}, #{toTno}, #{toCno}, #{swapWeek}, #{reason}, #{status})
+    </insert>
+
+    <update id="updateCourseSwap" parameterType="com.ruoyi.system.domain.CourseSwap">
+        update course_swap
+        <set>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where swap_id = #{swapId}
+    </update>
+
+    <delete id="deleteCourseSwapById" parameterType="int">
+        delete from course_swap where swap_id = #{swapId}
+    </delete>
+</mapper>

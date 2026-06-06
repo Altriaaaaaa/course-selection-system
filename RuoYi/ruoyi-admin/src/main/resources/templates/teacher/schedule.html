@@ -2,35 +2,276 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('我的课表')" /></head>
 <body class="gray-bg">
+<style>
+.page-nav {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.page-nav .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    background: #fff;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+.page-nav .btn-back:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+#schedule-table thead tr {
+    background-color: var(--secondary) !important;
+}
+#schedule-table thead th {
+    background-color: var(--secondary) !important;
+    color: #fff !important;
+    border-bottom: none !important;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 12px 10px;
+    text-align: center;
+    vertical-align: middle;
+}
+#schedule-table tbody td {
+    height: 90px;
+    vertical-align: top;
+    padding: 6px;
+    border-color: var(--border-color);
+}
+#schedule-table tbody td:first-child {
+    background-color: #f8f9fa;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+    color: var(--secondary);
+    font-size: 13px;
+    width: 90px;
+}
+#schedule-table tbody tr:hover td {
+    background-color: inherit;
+}
+#schedule-table tbody tr:hover td:first-child {
+    background-color: #f0f2f5;
+}
+.schedule-cell {
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: break-all;
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border: none;
+    color: #fff;
+    font-weight: 500;
+}
+.schedule-cell strong {
+    font-size: 12px;
+    display: block;
+    margin-bottom: 2px;
+}
+.schedule-cell small {
+    opacity: 0.9;
+}
+.schedule-cell.alert-success { background-color: #1ab394; color: #fff; }
+.schedule-cell.alert-info { background-color: #1c84c6; color: #fff; }
+.schedule-cell.alert-warning { background-color: #f8ac59; color: #fff; }
+.schedule-cell.alert-primary { background-color: #2f4050; color: #fff; }
+.schedule-cell.alert-danger { background-color: #ed5565; color: #fff; }
+#schedule-table td[data-day] {
+    min-width: 110px;
+}
+.schedule-loading {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-light);
+}
+.schedule-loading i {
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+</style>
 <div class="container-div">
     <div class="row">
-        <div class="col-sm-12" style="margin-bottom:10px">
-            <a class="btn btn-primary" th:href="@{/teacher/index}">返回首页</a>
+        <div class="col-sm-12">
+            <div class="page-nav">
+                <a class="btn-back" th:href="@{/teacher/index}">
+                    <i class="fa fa-arrow-left"></i> 返回首页
+                </a>
+            </div>
         </div>
-        <div class="col-sm-12 select-table table-striped">
-            <table id="bootstrap-table"></table>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5><i class="fa fa-calendar"></i> 课程周视图</h5>
+                </div>
+                <div class="ibox-content" style="padding: 0;">
+                    <div id="schedule-loading" class="schedule-loading">
+                        <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                        <p style="font-size:14px; margin-top:10px;">加载课表中...</p>
+                    </div>
+                    <table id="schedule-table" class="table table-bordered" style="display:none; margin-bottom:0;">
+                        <thead>
+                            <tr>
+                                <th>节次</th>
+                                <th>周一</th>
+                                <th>周二</th>
+                                <th>周三</th>
+                                <th>周四</th>
+                                <th>周五</th>
+                                <th>周六</th>
+                                <th>周日</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>第1-2节</td>
+                                <td data-day="周一" data-slot="1"></td>
+                                <td data-day="周二" data-slot="1"></td>
+                                <td data-day="周三" data-slot="1"></td>
+                                <td data-day="周四" data-slot="1"></td>
+                                <td data-day="周五" data-slot="1"></td>
+                                <td data-day="周六" data-slot="1"></td>
+                                <td data-day="周日" data-slot="1"></td>
+                            </tr>
+                            <tr>
+                                <td>第3-4节</td>
+                                <td data-day="周一" data-slot="2"></td>
+                                <td data-day="周二" data-slot="2"></td>
+                                <td data-day="周三" data-slot="2"></td>
+                                <td data-day="周四" data-slot="2"></td>
+                                <td data-day="周五" data-slot="2"></td>
+                                <td data-day="周六" data-slot="2"></td>
+                                <td data-day="周日" data-slot="2"></td>
+                            </tr>
+                            <tr>
+                                <td>第5-6节</td>
+                                <td data-day="周一" data-slot="3"></td>
+                                <td data-day="周二" data-slot="3"></td>
+                                <td data-day="周三" data-slot="3"></td>
+                                <td data-day="周四" data-slot="3"></td>
+                                <td data-day="周五" data-slot="3"></td>
+                                <td data-day="周六" data-slot="3"></td>
+                                <td data-day="周日" data-slot="3"></td>
+                            </tr>
+                            <tr>
+                                <td>第7-8节</td>
+                                <td data-day="周一" data-slot="4"></td>
+                                <td data-day="周二" data-slot="4"></td>
+                                <td data-day="周三" data-slot="4"></td>
+                                <td data-day="周四" data-slot="4"></td>
+                                <td data-day="周五" data-slot="4"></td>
+                                <td data-day="周六" data-slot="4"></td>
+                                <td data-day="周日" data-slot="4"></td>
+                            </tr>
+                            <tr>
+                                <td>第9-10节</td>
+                                <td data-day="周一" data-slot="5"></td>
+                                <td data-day="周二" data-slot="5"></td>
+                                <td data-day="周三" data-slot="5"></td>
+                                <td data-day="周四" data-slot="5"></td>
+                                <td data-day="周五" data-slot="5"></td>
+                                <td data-day="周六" data-slot="5"></td>
+                                <td data-day="周日" data-slot="5"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">
 var tno = [[${tno}]];
-$(function() {
-    var options = {
+var dayMap = {'周一':0,'周二':1,'周三':2,'周四':3,'周五':4,'周六':5,'周日':6};
+
+function getSlot(startNum) {
+    if (startNum >= 1 && startNum <= 2) return 1;
+    if (startNum >= 3 && startNum <= 4) return 2;
+    if (startNum >= 5 && startNum <= 6) return 3;
+    if (startNum >= 7 && startNum <= 8) return 4;
+    if (startNum >= 9 && startNum <= 10) return 5;
+    return null;
+}
+
+function parseClassTime(classTime) {
+    if (!classTime) return [];
+    var results = [];
+    var parts = classTime.split(/\s+/);
+    var i = 0;
+    while (i < parts.length) {
+        var part = parts[i];
+        var dayMatch = part.match(/^(周[一二三四五六日])/);
+        if (dayMatch) {
+            var day = dayMatch[1];
+            var timeStr = parts[i + 1] || '';
+            var numMatch = timeStr.match(/(\d+)-(\d+)节/);
+            if (numMatch) {
+                var startNum = parseInt(numMatch[1]);
+                var endNum = parseInt(numMatch[2]);
+                var slot = getSlot(startNum);
+                if (slot) {
+                    results.push({day: day, slot: slot, timeStr: startNum + '-' + endNum + '节'});
+                }
+                i += 2;
+                continue;
+            }
+        }
+        i++;
+    }
+    return results;
+}
+
+function loadSchedule() {
+    $.ajax({
+        type: "POST",
         url: ctx + "teacher/course/list",
-        createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
-        modalName: "课表", uniqueId: "cno",
-        queryParams: function(params) {
-            return {pageSize: params.limit, pageNum: params.offset / params.limit + 1, tno: tno};
+        data: {tno: tno, pageSize: 999, pageNum: 1},
+        success: function(result) {
+            $("#schedule-loading").hide();
+            $("#schedule-table").show();
+            if (result.code == web_status.SUCCESS && result.rows) {
+                var rows = result.rows;
+                for (var i = 0; i < rows.length; i++) {
+                    var course = rows[i];
+                    var cname = course.cname || '';
+                    var classTime = course.classTime || '';
+                    var semester = course.semester || '';
+                    var parsedList = parseClassTime(classTime);
+                    for (var j = 0; j < parsedList.length; j++) {
+                        var p = parsedList[j];
+                        var cell = $('td[data-day="' + p.day + '"][data-slot="' + p.slot + '"]');
+                        if (cell.length > 0) {
+                            var colorClass = '';
+                            var colors = ['bg-success', 'bg-info', 'bg-warning', 'bg-primary', 'bg-danger'];
+                            var colorIdx = i % colors.length;
+                            colorClass = colors[colorIdx];
+                            var html = '<div class="alert alert-' + colorClass.replace('bg-', '') + ' schedule-cell" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;">';
+                            html += '<strong>' + $.common.escapeHtml(cname) + '</strong>';
+                            html += '<br/><small>' + $.common.escapeHtml(p.timeStr) + '</small>';
+                            html += '</div>';
+                            cell.append(html);
+                        }
+                    }
+                }
+            }
         },
-        columns: [
-            {field:'cno',title:'课程号'},
-            {field:'cname',title:'课程名'},
-            {field:'semester',title:'学期'},
-            {field:'classTime',title:'上课时间'},
-            {field:'examTime',title:'考试时间'}
-        ]
-    };
-    $.table.init(options);
+        error: function() {
+            $("#schedule-loading").html('<span style="color:red;">加载失败，请刷新重试</span>');
+        }
+    });
+}
+
+$(function() {
+    loadSchedule();
 });
-</script></body></html>
+</script>
+</body></html>

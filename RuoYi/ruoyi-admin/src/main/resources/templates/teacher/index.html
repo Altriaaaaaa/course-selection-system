@@ -1,22 +1,214 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('教师工作台')" /></head>
+<head><th:block th:include="include :: header('教师工作台')" />
+<style>
+.teacher-info-card p {
+    font-size: 14px;
+    color: #676a6c;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f2f5;
+    margin: 0;
+}
+.teacher-info-card p:last-child {
+    border-bottom: none;
+}
+.teacher-info-card p strong {
+    color: #2f4050;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 60px;
+}
+.action-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+.action-bar .btn {
+    min-width: 100px;
+    text-align: center;
+}
+/* Dashboard Cards */
+.dashboard-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.2s;
+}
+.dashboard-card:hover {
+    transform: translateY(-2px);
+}
+.dashboard-card .icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 22px;
+    color: #fff;
+}
+.dashboard-card .number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2f4050;
+    margin: 5px 0;
+}
+.dashboard-card .label {
+    font-size: 13px;
+    color: #999;
+}
+.dashboard-card .sub {
+    font-size: 12px;
+    color: #1ab394;
+    margin-top: 4px;
+}
+/* Chart containers */
+.chart-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+.chart-box h5 {
+    margin: 0 0 15px 0;
+    font-size: 15px;
+    color: #2f4050;
+    font-weight: 600;
+    border-left: 3px solid #1ab394;
+    padding-left: 10px;
+}
+.chart-container {
+    width: 100%;
+    height: 280px;
+}
+/* Ranking table */
+.rank-badge {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+.rank-1 { background: #f0ad4e; }
+.rank-2 { background: #999; }
+.rank-3 { background: #d9534f; }
+.rank-other { background: #1ab394; }
+.score-excellent { color: #1ab394; font-weight: 600; }
+.score-good { color: #5bc0de; font-weight: 600; }
+.score-medium { color: #f0ad4e; font-weight: 600; }
+.score-pass { color: #999; }
+.score-fail { color: #d9534f; font-weight: 600; }
+</style>
+</head>
 <body class="gray-bg">
-<div class="wrapper wrapper-content">
+<div class="wrapper wrapper-content" style="padding: 20px;">
+
+<!-- Row 1: 教师信息 + 教授课程 -->
 <div class="row">
-<div class="col-sm-4"><div class="ibox"><div class="ibox-title"><h5>教师信息</h5></div>
-<div class="ibox-content" id="info-box"><p>加载中...</p></div></div></div>
-<div class="col-sm-8"><div class="ibox"><div class="ibox-title"><h5>教授课程</h5></div>
-<div class="ibox-content"><table id="bootstrap-table"></table>
-<div style="text-align:right;margin-top:8px"><a class="btn btn-primary" th:href="@{/teacher/schedule(tno=${param.tno})}">我的课表</a> <a class="btn btn-info" th:href="@{/teacher/statistics(tno=${param.tno})}">成绩统计</a></div>
-</div></div></div></div></div>
+<div class="col-sm-4">
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-user-circle" style="color:#1ab394;margin-right:8px;"></i>教师信息</h5></div>
+<div class="ibox-content teacher-info-card" id="info-box"><p>加载中...</p></div>
+</div></div>
+<div class="col-sm-8">
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-book" style="color:#1ab394;margin-right:8px;"></i>教授课程</h5></div>
+<div class="ibox-content">
+<table id="bootstrap-table"></table>
+<div class="action-bar">
+<a class="btn btn-primary" th:href="@{/teacher/schedule(tno=${param.tno})}"><i class="fa fa-calendar"></i> 我的课表</a>
+<a class="btn btn-info" th:href="@{/teacher/statistics(tno=${param.tno})}"><i class="fa fa-bar-chart"></i> 成绩统计</a>
+<a class="btn btn-warning" th:href="@{/teacher/swap(tno=${param.tno})}"><i class="fa fa-exchange"></i> 临时换课</a>
+</div>
+</div></div></div></div>
+
+<!-- Row 2: 数据概览卡片 -->
+<div class="row" id="dashboard-cards" style="display:none;">
+<div class="col-sm-2 col-xs-6">
+<div class="dashboard-card">
+<div class="icon" style="background: linear-gradient(135deg, #1ab394, #18a689);"><i class="fa fa-book"></i></div>
+<div class="number" id="dc-courses">-</div>
+<div class="label">教授课程</div>
+</div></div>
+<div class="col-sm-2 col-xs-6">
+<div class="dashboard-card">
+<div class="icon" style="background: linear-gradient(135deg, #5bc0de, #46b8da);"><i class="fa fa-users"></i></div>
+<div class="number" id="dc-students">-</div>
+<div class="label">授课学生</div>
+</div></div>
+<div class="col-sm-2 col-xs-6">
+<div class="dashboard-card">
+<div class="icon" style="background: linear-gradient(135deg, #f0ad4e, #ec971f);"><i class="fa fa-line-chart"></i></div>
+<div class="number" id="dc-avg">-</div>
+<div class="label">平均成绩</div>
+</div></div>
+<div class="col-sm-2 col-xs-6">
+<div class="dashboard-card">
+<div class="icon" style="background: linear-gradient(135deg, #1ab394, #18a689);"><i class="fa fa-check-circle"></i></div>
+<div class="number" id="dc-passrate">-</div>
+<div class="label">及格率</div>
+<div class="sub" id="dc-passdetail">-</div>
+</div></div>
+<div class="col-sm-2 col-xs-6">
+<div class="dashboard-card">
+<div class="icon" style="background: linear-gradient(135deg, #d9534f, #c9302c);"><i class="fa fa-times-circle"></i></div>
+<div class="number" id="dc-fail">-</div>
+<div class="label">不及格</div>
+</div></div>
+<div class="col-sm-2 col-xs-6">
+<div class="dashboard-card">
+<div class="icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);"><i class="fa fa-graduation-cap"></i></div>
+<div class="number" id="dc-graded">-</div>
+<div class="label">已录入成绩</div>
+</div></div>
+</div>
+
+<!-- Row 3: 图表区域 -->
+<div class="row" id="dashboard-charts" style="display:none; margin-top: 20px;">
+<div class="col-sm-6">
+<div class="chart-box">
+<h5><i class="fa fa-pie-chart" style="color:#1ab394;margin-right:6px;"></i>成绩分布</h5>
+<div id="gradePieChart" class="chart-container"></div>
+</div></div>
+<div class="col-sm-6">
+<div class="chart-box">
+<h5><i class="fa fa-bar-chart" style="color:#1ab394;margin-right:6px;"></i>各课程平均成绩对比</h5>
+<div id="courseBarChart" class="chart-container"></div>
+</div></div>
+</div>
+
+<!-- Row 4: 成绩排名表 -->
+<div class="row" id="dashboard-ranking" style="display:none; margin-top: 10px;">
+<div class="col-sm-12">
+<div class="chart-box">
+<h5><i class="fa fa-trophy" style="color:#1ab394;margin-right:6px;"></i>学生成绩排名</h5>
+<table id="ranking-table"></table>
+</div></div>
+</div>
+
+</div>
+
+<th:block th:include="include :: echarts-js" />
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">
 var tno = [[${tno}]];
 $(function() {
+    // 1. 加载教师信息
     $.ajax({url: ctx + "teacher/info", type: "post", data: {tno: tno}, success: function(r) {
-        if (r.code == 0 && r.data) { var d = r.data; $("#info-box").html("<p>教师号："+d.tno+"</p><p>姓名："+d.tname+"</p><p>职称："+(d.rank||'')+"</p>"); }
+        if (r.code == 0 && r.data) { var d = r.data; $("#info-box").html("<p><strong>教师号：</strong>"+d.tno+"</p><p><strong>姓名：</strong>"+d.tname+"</p><p><strong>职称：</strong>"+(d.rank||'无')+"</p>"); }
     }});
+
+    // 2. 加载课程表格
     var options = {
         url: ctx + "teacher/course/list",
         createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
@@ -34,6 +226,11 @@ $(function() {
         ]
     };
     $.table.init(options);
+
+    // 3. 加载数据看板
+    loadDashboard();
+
+    // 考试时间修改
     $('body').on('click', '.edit-exam-btn', function(e) {
         e.preventDefault();
         var cno = $(this).data('cno');
@@ -45,4 +242,119 @@ $(function() {
         });
     });
 });
+
+function loadDashboard() {
+    // 加载概览数据
+    $.ajax({
+        url: ctx + "teacher/dashboard/overview",
+        type: "post",
+        data: {tno: tno},
+        success: function(r) {
+            if (r.code == 0 && r.data) {
+                var d = r.data;
+                $("#dc-courses").text(d.totalCourses || 0);
+                $("#dc-students").text(d.totalStudents || 0);
+                $("#dc-avg").text(d.avgScore || 0);
+                $("#dc-passrate").text((d.passRate || 0) + "%");
+                $("#dc-passdetail").text((d.passCount || 0) + "人及格 / " + (d.failCount || 0) + "人不及格");
+                $("#dc-fail").text(d.failCount || 0);
+                $("#dc-graded").text(d.totalWithGrades || 0);
+                $("#dashboard-cards").fadeIn();
+
+                // 渲染成绩分布饼图
+                renderGradePie(d.gradeDistribution);
+                // 渲染课程对比柱状图
+                renderCourseBar(d.courseStats);
+                $("#dashboard-charts").fadeIn();
+            }
+        }
+    });
+
+    // 加载排名数据
+    $.ajax({
+        url: ctx + "teacher/dashboard/rankings",
+        type: "post",
+        data: {tno: tno},
+        success: function(r) {
+            if (r.code == 0 && r.data) {
+                renderRankingTable(r.data);
+                $("#dashboard-ranking").fadeIn();
+            }
+        }
+    });
+}
+
+function renderGradePie(dist) {
+    var chart = echarts.init(document.getElementById('gradePieChart'));
+    var option = {
+        tooltip: { trigger: 'item', formatter: '{b}: {c}人 ({d}%)' },
+        legend: { bottom: '5%', left: 'center' },
+        color: ['#1ab394', '#5bc0de', '#f0ad4e', '#d9534f', '#999'],
+        series: [{
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+            label: { show: true, formatter: '{b}\n{c}人' },
+            data: [
+                {value: dist.excellent || 0, name: '优秀(90-100)'},
+                {value: dist.good || 0, name: '良好(80-89)'},
+                {value: dist.medium || 0, name: '中等(70-79)'},
+                {value: dist.pass || 0, name: '及格(60-69)'},
+                {value: dist.fail || 0, name: '不及格(<60)'}
+            ]
+        }]
+    };
+    chart.setOption(option);
+    $(window).resize(function() { chart.resize(); });
+}
+
+function renderCourseBar(stats) {
+    var chart = echarts.init(document.getElementById('courseBarChart'));
+    var names = [], avgs = [], passRates = [];
+    stats.forEach(function(s) {
+        names.push(s.cname);
+        avgs.push(s.avgScore);
+        passRates.push(s.passRate);
+    });
+    var option = {
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { data: ['平均分', '及格率(%)'], bottom: '5%' },
+        grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+        xAxis: { type: 'category', data: names, axisLabel: { rotate: 15, fontSize: 11 } },
+        yAxis: { type: 'value', max: 100 },
+        series: [
+            {name: '平均分', type: 'bar', data: avgs, itemStyle: {color: '#1ab394', borderRadius: [4,4,0,0]}, barWidth: '30%'},
+            {name: '及格率(%)', type: 'bar', data: passRates, itemStyle: {color: '#5bc0de', borderRadius: [4,4,0,0]}, barWidth: '30%'}
+        ]
+    };
+    chart.setOption(option);
+    $(window).resize(function() { chart.resize(); });
+}
+
+function renderRankingTable(data) {
+    $("#ranking-table").bootstrapTable({
+        data: data,
+        pagination: true,
+        pageSize: 10,
+        pageList: [10, 25, 50],
+        sortable: true,
+        columns: [
+            {field: 'rank', title: '排名', width: 60, formatter: function(v, r, i) {
+                var cls = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+                return '<span class="rank-badge ' + cls + '">' + v + '</span>';
+            }},
+            {field: 'sno', title: '学号'},
+            {field: 'sname', title: '姓名'},
+            {field: 'cname', title: '课程'},
+            {field: 'normalScore', title: '平时成绩', width: 80},
+            {field: 'testScore', title: '期末成绩', width: 80},
+            {field: 'totalScore', title: '总评', width: 80, formatter: function(v) {
+                var cls = v >= 90 ? 'score-excellent' : v >= 80 ? 'score-good' : v >= 70 ? 'score-medium' : v >= 60 ? 'score-pass' : 'score-fail';
+                return '<span class="' + cls + '">' + v + '</span>';
+            }},
+            {field: 'gpa', title: '绩点', width: 60}
+        ]
+    });
+}
 </script></body></html>
