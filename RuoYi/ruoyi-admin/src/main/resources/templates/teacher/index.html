@@ -71,21 +71,23 @@
 .chart-box {
     background: #fff;
     border-radius: 8px;
-    padding: 20px;
+    padding: 24px 28px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 .chart-box h5 {
-    margin: 0 0 15px 0;
+    margin: 0 0 24px 0;
     font-size: 15px;
     color: #2f4050;
     font-weight: 600;
     border-left: 3px solid #1ab394;
     padding-left: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 .chart-container {
     width: 100%;
-    height: 280px;
+    height: 320px;
 }
 /* Ranking table */
 .rank-badge {
@@ -173,27 +175,26 @@
 </div></div>
 </div>
 
-<!-- Row 3: 图表区域 -->
-<div class="row" id="dashboard-charts" style="display:none; margin-top: 20px;">
+<!-- Row 3: 左图表 + 右排名 -->
+<div class="row" id="dashboard-charts" style="display:none; margin-top: 28px;">
+<!-- 左侧：图表区 -->
 <div class="col-sm-6">
 <div class="chart-box">
 <h5><i class="fa fa-pie-chart" style="color:#1ab394;margin-right:6px;"></i>成绩分布</h5>
 <div id="gradePieChart" class="chart-container"></div>
-</div></div>
-<div class="col-sm-6">
+</div>
 <div class="chart-box">
 <h5><i class="fa fa-bar-chart" style="color:#1ab394;margin-right:6px;"></i>各课程平均成绩对比</h5>
 <div id="courseBarChart" class="chart-container"></div>
-</div></div>
 </div>
-
-<!-- Row 4: 成绩排名表 -->
-<div class="row" id="dashboard-ranking" style="display:none; margin-top: 10px;">
-<div class="col-sm-12">
-<div class="chart-box">
+</div>
+<!-- 右侧：成绩排名 -->
+<div class="col-sm-6">
+<div class="chart-box" style="min-height: 680px;">
 <h5><i class="fa fa-trophy" style="color:#1ab394;margin-right:6px;"></i>学生成绩排名</h5>
 <table id="ranking-table"></table>
-</div></div>
+</div>
+</div>
 </div>
 
 </div>
@@ -278,7 +279,6 @@ function loadDashboard() {
         success: function(r) {
             if (r.code == 0 && r.data) {
                 renderRankingTable(r.data);
-                $("#dashboard-ranking").fadeIn();
             }
         }
     });
@@ -288,14 +288,19 @@ function renderGradePie(dist) {
     var chart = echarts.init(document.getElementById('gradePieChart'));
     var option = {
         tooltip: { trigger: 'item', formatter: '{b}: {c}人 ({d}%)' },
-        legend: { bottom: '5%', left: 'center' },
+        legend: { bottom: '2%', left: 'center', itemGap: 20, itemWidth: 14, itemHeight: 14, textStyle: { fontSize: 12, color: '#676a6c' } },
         color: ['#1ab394', '#5bc0de', '#f0ad4e', '#d9534f', '#999'],
         series: [{
             type: 'pie',
-            radius: ['40%', '70%'],
+            radius: ['35%', '60%'],
+            center: ['50%', '42%'],
             avoidLabelOverlap: false,
-            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
-            label: { show: true, formatter: '{b}\n{c}人' },
+            itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+            label: { show: false },
+            emphasis: {
+                label: { show: true, fontSize: 14, fontWeight: 'bold', formatter: '{b}\n{c}人 ({d}%)' },
+                itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' }
+            },
             data: [
                 {value: dist.excellent || 0, name: '优秀(90-100)'},
                 {value: dist.good || 0, name: '良好(80-89)'},
@@ -319,8 +324,8 @@ function renderCourseBar(stats) {
     });
     var option = {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        legend: { data: ['平均分', '及格率(%)'], bottom: '5%' },
-        grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+        legend: { data: ['平均分', '及格率(%)'], bottom: '2%', itemGap: 20, itemWidth: 14, itemHeight: 14, textStyle: { fontSize: 12, color: '#676a6c' } },
+        grid: { left: '3%', right: '4%', bottom: '18%', top: '8%', containLabel: true },
         xAxis: { type: 'category', data: names, axisLabel: { rotate: 15, fontSize: 11 } },
         yAxis: { type: 'value', max: 100 },
         series: [
