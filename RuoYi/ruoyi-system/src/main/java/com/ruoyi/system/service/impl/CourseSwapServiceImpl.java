@@ -9,6 +9,10 @@ import com.ruoyi.system.domain.CourseSwap;
 import com.ruoyi.system.mapper.CourseSwapMapper;
 import com.ruoyi.system.service.IClassService;
 import com.ruoyi.system.service.ICourseSwapService;
+import com.ruoyi.system.service.ICourseSelectionService;
+import com.ruoyi.system.service.INotificationService;
+import com.ruoyi.system.domain.CourseSelection;
+import com.ruoyi.system.domain.Notification;
 
 @Service("courseSwapService")
 public class CourseSwapServiceImpl implements ICourseSwapService
@@ -18,6 +22,10 @@ public class CourseSwapServiceImpl implements ICourseSwapService
 
     @Autowired
     private IClassService classService;
+    @Autowired
+    private ICourseSelectionService courseSelectionService;
+    @Autowired
+    private INotificationService notificationService;
 
     @Override
     public List<CourseSwap> selectCourseSwapList(CourseSwap courseSwap)
@@ -85,6 +93,34 @@ public class CourseSwapServiceImpl implements ICourseSwapService
 
         // 更新申请状态为已批准
         swap.setStatus(1);
-        return courseSwapMapper.updateCourseSwap(swap);
+        int result = courseSwapMapper.updateCourseSwap(swap);
+
+        // 通知受影响的学生
+        try {
+            notifyStudents(swap.getFromCno(), "换课通知",
+                "您的课程「" + fromClass.getCname() + "」上课时间已调整为 " + toTime);
+            notifyStudents(swap.getToCno(), "换课通知",
+                "您的课程「" + toClass.getCname() + "」上课时间已调整为 " + fromTime);
+        } catch (Exception ignored) {}
+
+        return result;
+    }
+
+    private void notifyStudents(String cno, String title, String content)
+    {
+        CourseSelection query = new CourseSelection();
+        query.setCno(cno);
+        List<CourseSelection> students = courseSelectionService.selectCourseSelectionList(query);
+        for (CourseSelection cs : students)
+        {
+            Notification notif = new Notification();
+            notif.setRecipientType("student");
+            notif.setRecipientId(cs.getSno());
+            notif.setTitle(title);
+            notif.setContent(content);
+            notif.setIsRead(0);
+            notif.setSourceType("course_swap");
+            try { notificationService.insertNotification(notif); } catch (Exception ignored) {}
+        }
     }
 }

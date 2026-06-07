@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:include="include :: header('换课审批')" /></head>
+<style>
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status-pending { background: #fff8e6; color: #c79520; border: 1px solid #f5e0a0; }
+.status-approved { background: #e8f8f5; color: #1a8a6e; border: 1px solid #a3e4d7; }
+.status-rejected { background: #fdecea; color: #c0392b; border: 1px solid #f5b7b1; }
+</style>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title"><h5><i class="fa fa-exchange" style="color:#1c84c6;margin-right:8px;"></i>换课审批</h5></div>
+                <div class="ibox-content">
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+$(function() {
+    var options = {
+        url: ctx + "admin/audit/swap/list",
+        createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
+        modalName: "换课申请", uniqueId: "swapId",
+        columns: [
+            {field:'swapId',title:'编号',width:60},
+            {field:'fromTname',title:'申请教师'},
+            {field:'fromCname',title:'换出课程'},
+            {field:'toTname',title:'目标教师'},
+            {field:'toCname',title:'目标课程'},
+            {field:'swapWeek',title:'换课周次'},
+            {field:'reason',title:'原因'},
+            {field:'status',title:'状态',formatter:function(v){
+                return v==0?'<span class="status-badge status-pending">待审批</span>'
+                    :v==1?'<span class="status-badge status-approved">已批准</span>'
+                    :'<span class="status-badge status-rejected">已拒绝</span>';
+            }},
+            {title:'操作',formatter:function(v,r){
+                if (r.status != 0) return '-';
+                return '<a class="btn btn-success btn-xs" onclick="approveSwap('+r.swapId+')">批准</a> '
+                     + '<a class="btn btn-danger btn-xs" onclick="rejectSwap('+r.swapId+')">拒绝</a>';
+            }}
+        ]
+    };
+    $.table.init(options);
+});
+
+function approveSwap(swapId) {
+    $.modal.confirm("确认批准该换课申请？", function() {
+        $.ajax({type:"POST", url:ctx+"admin/audit/swap/approve", data:{swapId:swapId}, success:function(r){
+            if(r.code==0){$.modal.msgSuccess(r.msg);$.table.refresh();}else{$.modal.alertError(r.msg);}
+        }});
+    });
+}
+
+function rejectSwap(swapId) {
+    $.modal.confirm("确认拒绝该换课申请？", function() {
+        $.ajax({type:"POST", url:ctx+"admin/audit/swap/reject", data:{swapId:swapId}, success:function(r){
+            if(r.code==0){$.modal.msgSuccess(r.msg);$.table.refresh();}else{$.modal.alertError(r.msg);}
+        }});
+    });
+}
+</script>
+</body></html>

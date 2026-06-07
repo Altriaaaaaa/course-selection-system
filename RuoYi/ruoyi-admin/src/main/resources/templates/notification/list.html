@@ -2,18 +2,19 @@
 <head><th:block th:include="include :: header('消息中心')" /></head>
 <body class="gray-bg"><div class="container-div"><div class="row"><div class="col-sm-12">
 <div class="btn-group-sm"><a class="btn btn-primary" onclick="readAll()">全部标记已读</a></div>
-<div class="select-table table-striped"><table id="notif-table"></table></div></div></div></div>
+<div class="select-table table-striped"><table id="bootstrap-table"></table></div></div></div></div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">var ctx=[[@{/}]];
 $(function(){
-  var ops={url:ctx+"notification/list",search:false,modalName:"消息",uniqueId:"notifId",
+  var ops={url:ctx+"notification/list",modalName:"消息",uniqueId:"notifId",
     columns:[{field:"title",title:"标题"},{field:"content",title:"内容"},
       {field:"createTime",title:"时间"},{field:"isRead",title:"状态",formatter:function(v){
         return v==0?'<span class="label label-warning">未读</span>':'<span class="label label-success">已读</span>';}},
       {title:"操作",formatter:function(v,r,i){if(r.isRead==0)return'<a class="btn btn-xs btn-primary" onclick="read('+r.notifId+')">标记已读</a>';return'';}}
     ]};
   $.table.init(ops);
+  $.table.search();
 });
-function read(id){$.post(ctx+'notification/read',{notifId:id},function(r){if(r.code==0)$.table.refresh();});}
-function readAll(){$.post(ctx+'notification/read-all',function(r){if(r.code==0)$.table.refresh();});}
+function read(id){$.post(ctx+'notification/read',{notifId:id},function(r){if(r.code==0)$.table.search();});}
+function readAll(){$.post(ctx+'notification/read-all',function(r){if(r.code==0)$.table.search();});}
 </script></body></html>
