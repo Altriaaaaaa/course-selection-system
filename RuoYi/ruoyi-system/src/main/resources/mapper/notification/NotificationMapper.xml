@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.NotificationMapper">
+
+    <resultMap type="Notification" id="NotificationResult">
+        <id     property="notifId"       column="notif_id"      />
+        <result property="recipientType" column="recipient_type" />
+        <result property="recipientId"   column="recipient_id"   />
+        <result property="title"         column="title"          />
+        <result property="content"       column="content"        />
+        <result property="isRead"        column="is_read"        />
+        <result property="sourceType"    column="source_type"    />
+        <result property="sourceId"      column="source_id"      />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <select id="selectNotificationList" parameterType="Notification" resultMap="NotificationResult">
+        select * from notification
+        <where>
+            <if test="recipientType != null and recipientType != ''">and recipient_type = #{recipientType}</if>
+            <if test="recipientId != null and recipientId != ''">and recipient_id = #{recipientId}</if>
+            <if test="isRead != null">and is_read = #{isRead}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectUnreadCount" parameterType="Notification" resultType="int">
+        select count(*) from notification
+        where recipient_type = #{recipientType}
+        and recipient_id = #{recipientId}
+        and is_read = 0
+    </select>
+
+    <insert id="insertNotification" parameterType="Notification" useGeneratedKeys="true" keyProperty="notifId">
+        insert into notification (
+            recipient_type, recipient_id, title, content, is_read, source_type, source_id, create_time
+        ) values (
+            #{recipientType}, #{recipientId}, #{title}, #{content}, #{isRead}, #{sourceType}, #{sourceId}, sysdate()
+        )
+    </insert>
+
+    <update id="markAsRead" parameterType="Long">
+        update notification set is_read = 1 where notif_id = #{notifId}
+    </update>
+
+    <update id="markAllAsRead" parameterType="Notification">
+        update notification set is_read = 1
+        where recipient_type = #{recipientType}
+        and recipient_id = #{recipientId}
+    </update>
+
+</mapper>

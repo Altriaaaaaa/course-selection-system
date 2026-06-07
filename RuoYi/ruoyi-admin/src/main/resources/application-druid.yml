@@ -8,7 +8,7 @@ spring:
             master:
                 url: jdbc:mysql://localhost:3306/course_selection?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
                 username: root
-                password: 123456
+                password: Zjr20050124
             # 浠庡簱鏁版嵁婧?
             slave:
                 # 浠庢暟鎹簮寮€鍏?榛樿鍏抽棴

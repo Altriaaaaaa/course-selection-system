@@ -58,6 +58,13 @@
                     <h5><i class="fa fa-check-circle" style="color:#1ab394;margin-right:8px;"></i>我的选课</h5>
                 </div>
                 <div class="ibox-content">
+                    <div class="row" style="margin-bottom:12px;">
+                        <div class="col-sm-3">
+                            <select id="semester-filter" class="form-control input-sm" onchange="$.table.search()">
+                                <option value="">全部学期</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="quick-actions">
                         <a class="action-card" th:href="@{/student/schedule(sno=${sno})}">
                             <span class="action-icon icon-purple"><i class="fa fa-calendar"></i></span>
@@ -86,11 +93,24 @@
 <script th:inline="javascript">
 var sno = [[${sno}]];
 $(function() {
+    $.ajax({url: ctx + "student/dashboard", type: "post", data: {sno: sno}, success: function(r) {
+        if (r.code == 0 && r.data && r.data.semesters) {
+            $.each(r.data.semesters, function(i, s) {
+                $("#semester-filter").append('<option value="' + s + '">' + s + '</option>');
+            });
+        }
+    }});
+
     var options = {
         url: ctx + "student/course/my/list",
         createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
         modalName: "选课", uniqueId: "cno",
-        queryParams: function(params) { return {pageSize: params.limit, pageNum: params.offset / params.limit + 1, sno: sno}; },
+        queryParams: function(params) {
+            var q = {pageSize: params.limit, pageNum: params.offset / params.limit + 1, sno: sno};
+            var sem = $("#semester-filter").val();
+            if (sem) q.semester = sem;
+            return q;
+        },
         columns: [{field:'cno',title:'课程号'},{field:'cname',title:'课程名'},{field:'semester',title:'学期'},{field:'normalScore',title:'平时成绩'},{field:'testScore',title:'考试成绩'},{title:'操作',formatter:function(v,r){return '<a class="btn btn-danger btn-xs" href="#" onclick="dropCourse(\''+r.cno+'\')">退课</a>';}}]
     };
     $.table.init(options);

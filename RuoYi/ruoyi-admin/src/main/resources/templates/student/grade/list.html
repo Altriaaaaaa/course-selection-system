@@ -2,31 +2,12 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head><th:block th:include="include :: header('成绩查询')" /></head>
 <style>
-.gpa-card {
-    background: linear-gradient(135deg, #1ab394 0%, #17a085 100%);
-    color: #fff;
-    border-radius: 8px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(26,179,148,0.25);
-}
-.gpa-card .gpa-label {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-bottom: 4px;
-}
-.gpa-card .gpa-value {
-    font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -1px;
-}
-.gpa-card .gpa-icon {
-    font-size: 48px;
-    opacity: 0.3;
-}
+.gpa-card { background: linear-gradient(135deg, #1ab394 0%, #17a085 100%); color: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(26,179,148,0.25); }
+.gpa-card .gpa-label { font-size: 14px; opacity: 0.9; margin-bottom: 4px; }
+.gpa-card .gpa-value { font-size: 36px; font-weight: 700; letter-spacing: -1px; }
+.gpa-card .gpa-icon { font-size: 48px; opacity: 0.3; }
+.chart-box { margin-bottom: 20px; }
+.chart-box .chart-inner { width: 100%; height: 300px; }
 </style>
 <body class="gray-bg">
 <div class="container-div">
@@ -36,16 +17,22 @@
         </div>
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5><i class="fa fa-file-text-o" style="color:#f8ac59;margin-right:8px;"></i>成绩查询</h5>
-                </div>
+                <div class="ibox-title"><h5><i class="fa fa-file-text-o" style="color:#f8ac59;margin-right:8px;"></i>成绩查询</h5></div>
                 <div class="ibox-content">
-                    <div id="gpa-section" class="gpa-card">
-                        <div>
-                            <div class="gpa-label">平均绩点 (GPA)</div>
-                            <div class="gpa-value">--</div>
+                    <div class="row" style="margin-bottom:12px;">
+                        <div class="col-sm-3">
+                            <select id="semester-filter" class="form-control input-sm" onchange="$.table.search()">
+                                <option value="">全部学期</option>
+                            </select>
                         </div>
+                    </div>
+                    <div id="gpa-section" class="gpa-card">
+                        <div><div class="gpa-label">平均绩点 (GPA)</div><div class="gpa-value">--</div></div>
                         <div class="gpa-icon"><i class="fa fa-trophy"></i></div>
+                    </div>
+                    <div class="chart-box ibox" style="margin-bottom:20px;">
+                        <div class="ibox-title"><h5><i class="fa fa-line-chart" style="color:#1c84c6;margin-right:8px;"></i>成绩趋势</h5></div>
+                        <div class="ibox-content"><div id="trend-chart" class="chart-inner"></div></div>
                     </div>
                     <table id="bootstrap-table"></table>
                 </div>
@@ -54,17 +41,60 @@
     </div>
 </div>
 <th:block th:include="include :: footer" />
+<th:block th:include="include :: echarts-js" />
 <script th:inline="javascript">
 var sno = [[${sno}]];
 $(function() {
+    $.ajax({url: ctx + "student/dashboard", type: "post", data: {sno: sno}, success: function(r) {
+        if (r.code == 0 && r.data && r.data.semesters) {
+            $.each(r.data.semesters, function(i, s) {
+                $("#semester-filter").append('<option value="' + s + '">' + s + '</option>');
+            });
+        }
+    }});
+
     var options = {
         url: ctx + "student/grade/list",
         createUrl: undefined, updateUrl: undefined, removeUrl: undefined,
         modalName: "成绩", uniqueId: "cno",
-        queryParams: function(params) { return {pageSize: params.limit, pageNum: params.offset / params.limit + 1, sno: sno}; },
+        queryParams: function(params) {
+            var q = {pageSize: params.limit, pageNum: params.offset / params.limit + 1, sno: sno};
+            var sem = $("#semester-filter").val();
+            if (sem) q.semester = sem;
+            return q;
+        },
         columns: [{field:'cno',title:'课程号'},{field:'cname',title:'课程名'},{field:'semester',title:'学期'},{field:'normalScore',title:'平时成绩'},{field:'testScore',title:'考试成绩'},{field:'total',title:'总评',formatter:function(v,r){if (r.normalScore && r.testScore) return (r.normalScore*0.4+r.testScore*0.6).toFixed(1);return '-';}}]
     };
     $.table.init(options);
-    $.get(ctx + "student/gpa", {sno:sno}, function(r) { if (r.code == 0) { document.getElementById("gpa-section").innerHTML = '<div><div class="gpa-label">平均绩点 (GPA)</div><div class="gpa-value">' + r.gpa.toFixed(2) + '</div></div><div class="gpa-icon"><i class="fa fa-trophy"></i></div>'; } });
+    $.get(ctx + "student/gpa", {sno:sno}, function(r) {
+        if (r.code == 0) $("#gpa-section").html('<div><div class="gpa-label">平均绩点 (GPA)</div><div class="gpa-value">' + r.gpa.toFixed(2) + '</div></div><div class="gpa-icon"><i class="fa fa-trophy"></i></div>');
+    });
+
+    // 成绩趋势图
+    $.get(ctx + "student/grade/trend", {sno:sno}, function(r) {
+        if (r.code == 0 && r.data && r.data.length > 0) {
+            var semesters = [], scores = [];
+            $.each(r.data, function(i, d) { semesters.push(d.semester); scores.push(d.avgScore); });
+            var chart = echarts.init(document.getElementById('trend-chart'));
+            chart.setOption({
+                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>平均分: <b>' + p[0].value + '</b>'; } },
+                grid: { left: 50, right: 30, top: 20, bottom: 30 },
+                xAxis: { type: 'category', data: semesters, axisLabel: { rotate: 20 } },
+                yAxis: { type: 'value', min: 0, max: 100, name: '平均分' },
+                series: [{
+                    type: 'line', data: scores, smooth: true,
+                    lineStyle: { color: '#1ab394', width: 3 },
+                    itemStyle: { color: '#1ab394' },
+                    areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                        colorStops: [{offset:0, color:'rgba(26,179,148,0.3)'},{offset:1, color:'rgba(26,179,148,0.02)'}] } },
+                    markLine: { silent: true, data: [{ yAxis: 60, label: { formatter: '及格线' }, lineStyle: { color: '#ed5565', type: 'dashed' } }] }
+                }]
+            });
+            $(window).resize(function() { chart.resize(); });
+        } else {
+            $('#trend-chart').html('<p style="text-align:center;color:#999;padding:80px 0;">暂无成绩数据</p>');
+        }
+    });
 });
-</script></body></html>
+</script>
+</body></html>

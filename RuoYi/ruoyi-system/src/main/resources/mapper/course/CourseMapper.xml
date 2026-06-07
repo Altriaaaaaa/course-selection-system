@@ -48,8 +48,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectCourseById" parameterType="String" resultMap="CourseResult">
-        <include refid="selectCourseVo"/>
-        where c.cno = #{cno}
+        select * from (
+            <include refid="selectCourseVo"/>
+            where c.cno = #{cno}
+        ) t limit 1
     </select>
 
     <select id="checkCnoUnique" parameterType="String" resultMap="CourseResult">

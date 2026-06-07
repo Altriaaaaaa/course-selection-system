@@ -1,86 +1,54 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<head><th:block th:include="include :: header('学生工作台')" />
+<head><th:block th:include="include :: header('学生工作台')" /></head>
 <style>
-.student-info-card p {
-    font-size: 14px;
-    color: #676a6c;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f2f5;
-    margin: 0;
-}
-.student-info-card p:last-child {
-    border-bottom: none;
-}
-.student-info-card p strong {
-    color: #2f4050;
-    font-weight: 600;
-    display: inline-block;
-    min-width: 60px;
-}
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-}
-.quick-actions .action-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px;
-    background: #fff;
-    border: 1px solid #e7eaec;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #2f4050;
-    transition: all 0.2s ease;
-}
-.quick-actions .action-card:hover {
-    border-color: #1ab394;
-    box-shadow: 0 2px 8px rgba(26,179,148,0.12);
-    text-decoration: none;
-    color: #1ab394;
-}
-.quick-actions .action-card .action-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: #fff;
-    flex-shrink: 0;
-}
-.quick-actions .action-card .action-text {
-    font-size: 13px;
-    font-weight: 500;
-}
-.icon-green { background-color: #1ab394; }
-.icon-blue { background-color: #1c84c6; }
-.icon-orange { background-color: #f8ac59; }
-.icon-red { background-color: #ed5565; }
-.icon-purple { background-color: #9b59b6; }
-.icon-gray { background-color: #676a6c; }
-.bell-wrapper {
-    position: relative;
-    display: inline-block;
-}
-.bell-wrapper .badge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background-color: #ed5565;
-    font-size: 10px;
-    padding: 2px 5px;
-    border-radius: 10px;
-    min-width: 16px;
-    text-align: center;
-}
+.student-info-card p { font-size: 14px; color: #676a6c; padding: 8px 0; border-bottom: 1px solid #f0f2f5; margin: 0; }
+.student-info-card p:last-child { border-bottom: none; }
+.student-info-card p strong { color: #2f4050; font-weight: 600; display: inline-block; min-width: 60px; }
+
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-card { background: #fff; border: 1px solid #e7eaec; border-radius: 8px; padding: 16px; text-align: center; transition: all 0.2s; }
+.stat-card:hover { border-color: #1ab394; box-shadow: 0 2px 12px rgba(26,179,148,0.1); }
+.stat-card .stat-num { font-size: 28px; font-weight: 700; color: #2f4050; line-height: 1.2; }
+.stat-card .stat-sub { font-size: 12px; color: #999; }
+.stat-card .stat-label { font-size: 12px; color: #999; margin-top: 4px; }
+.stat-card .stat-icon { font-size: 20px; margin-bottom: 6px; }
+.stat-card.gpa .stat-num { color: #1ab394; }
+.stat-card.credit .stat-num { color: #1c84c6; }
+.stat-card.course .stat-num { color: #f8ac59; }
+.stat-card.exam .stat-num { color: #ed5565; }
+
+.semester-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.semester-bar select { width: 180px; }
+.semester-bar .sem-badge { font-size: 12px; color: #999; }
+
+.progress-section { margin-top: 8px; }
+.progress-section .progress-title { font-size: 13px; color: #676a6c; margin-bottom: 2px; display: flex; justify-content: space-between; }
+.progress-section .progress-title strong { color: #2f4050; }
+.progress { height: 18px; border-radius: 9px; margin-bottom: 12px; background: #f3f3f4; overflow: hidden; }
+.progress-bar { line-height: 18px; font-size: 11px; font-weight: 600; }
+
+.todo-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f2f5; font-size: 13px; }
+.todo-item:last-child { border-bottom: none; }
+.todo-item .todo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.todo-item .todo-dot.warn { background: #f8ac59; }
+.todo-item .todo-dot.danger { background: #ed5565; }
+.todo-item .todo-dot.info { background: #1c84c6; }
+
+.exam-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 8px; padding: 16px; margin-bottom: 10px; }
+.exam-card .exam-title { font-size: 13px; opacity: 0.85; }
+.exam-card .exam-course { font-size: 16px; font-weight: 600; margin: 4px 0; }
+.exam-card .exam-time { font-size: 12px; opacity: 0.75; }
+
+.quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.quick-actions .action-card { display: flex; align-items: center; gap: 10px; padding: 14px; background: #fff; border: 1px solid #e7eaec; border-radius: 8px; text-decoration: none; color: #2f4050; transition: all 0.2s ease; }
+.quick-actions .action-card:hover { border-color: #1ab394; box-shadow: 0 2px 8px rgba(26,179,148,0.12); text-decoration: none; color: #1ab394; }
+.quick-actions .action-card .action-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; flex-shrink: 0; }
+.quick-actions .action-card .action-text { font-size: 12px; font-weight: 500; }
 </style>
-</head>
 <body class="gray-bg">
 <div class="wrapper wrapper-content" style="padding: 20px;">
+
 <div class="row">
 <div class="col-sm-4">
 <div class="ibox">
@@ -88,55 +56,183 @@
 <div class="ibox-content student-info-card">
 <p><strong>学号：</strong><span id="info-sno"></span></p>
 <p><strong>姓名：</strong><span id="info-name"></span></p>
+<p><strong>院系：</strong><span id="info-dept"></span></p>
 </div></div></div>
 <div class="col-sm-8">
+<div class="ibox">
+<div class="ibox-title">
+<h5 style="display:inline;"><i class="fa fa-dashboard" style="color:#1ab394;margin-right:8px;"></i>学业概览</h5>
+<div class="semester-bar" style="float:right;margin-top:-2px;">
+<select id="semester-select" class="form-control input-sm" onchange="loadDashboard()">
+<option value="">全部学期（累计）</option>
+</select>
+</div>
+</div>
+<div class="ibox-content">
+<div class="stat-cards">
+<div class="stat-card gpa">
+<div class="stat-icon" style="color:#1ab394;"><i class="fa fa-star"></i></div>
+<div class="stat-num" id="stat-gpa">--</div>
+<div class="stat-label">平均绩点 GPA</div>
+</div>
+<div class="stat-card credit">
+<div class="stat-icon" style="color:#1c84c6;"><i class="fa fa-trophy"></i></div>
+<div class="stat-num" id="stat-credit">--</div>
+<div class="stat-label">已修学分 <span id="sem-credits-label" style="font-size:11px;opacity:0.7;"></span></div>
+</div>
+<div class="stat-card course">
+<div class="stat-icon" style="color:#f8ac59;"><i class="fa fa-book"></i></div>
+<div class="stat-num" id="stat-course">--</div>
+<div class="stat-label">已选课程</div>
+</div>
+<div class="stat-card exam">
+<div class="stat-icon" style="color:#ed5565;"><i class="fa fa-clock-o"></i></div>
+<div class="stat-num" id="stat-exam">--</div>
+<div class="stat-label">待考科目</div>
+</div>
+</div>
+</div></div></div></div>
+
+<div class="row">
+<div class="col-sm-6">
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-tasks" style="color:#1ab394;margin-right:8px;"></i>学分进度 <small id="progress-label">（累计）</small></h5></div>
+<div class="ibox-content">
+<div class="progress-section">
+<div class="progress-title"><span>必修学分</span><span><strong id="prog-required">0</strong> / <span id="prog-req-target">80</span></span></div>
+<div class="progress"><div class="progress-bar progress-bar-info" id="bar-required" role="progressbar" style="width:0%;">0%</div></div>
+</div>
+<div class="progress-section">
+<div class="progress-title"><span>选修学分</span><span><strong id="prog-elective">0</strong> / <span id="prog-ele-target">50</span></span></div>
+<div class="progress"><div class="progress-bar progress-bar-warning" id="bar-elective" role="progressbar" style="width:0%;">0%</div></div>
+</div>
+<div class="progress-section">
+<div class="progress-title"><span>总学分</span><span><strong id="prog-total">0</strong> / <span id="prog-total-target">130</span></span></div>
+<div class="progress"><div class="progress-bar progress-bar-success" id="bar-total" role="progressbar" style="width:0%;">0%</div></div>
+</div>
+</div></div></div>
+<div class="col-sm-6">
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-calendar-check-o" style="color:#ed5565;margin-right:8px;"></i>最近考试</h5></div>
+<div class="ibox-content" id="exam-list" style="min-height:80px;">
+<p style="color:#999;text-align:center;padding:20px;">暂无考试安排</p>
+</div></div>
+<div class="ibox">
+<div class="ibox-title"><h5><i class="fa fa-bell-o" style="color:#f8ac59;margin-right:8px;"></i>待办提醒</h5></div>
+<div class="ibox-content" id="todo-list" style="min-height:80px;">
+<p style="color:#999;text-align:center;padding:20px;">加载中...</p>
+</div></div>
+</div></div>
+
+<div class="row">
+<div class="col-sm-12">
 <div class="ibox">
 <div class="ibox-title"><h5><i class="fa fa-rocket" style="color:#1ab394;margin-right:8px;"></i>快捷操作</h5></div>
 <div class="ibox-content">
 <div class="quick-actions">
 <a class="action-card" th:href="@{/student/course(sno=${param.sno})}">
-<span class="action-icon icon-blue"><i class="fa fa-search"></i></span>
+<span class="action-icon" style="background:#1c84c6;"><i class="fa fa-search"></i></span>
 <span class="action-text">浏览可选课程</span>
 </a>
 <a class="action-card" th:href="@{/student/course/my(sno=${param.sno})}">
-<span class="action-icon icon-green"><i class="fa fa-check-circle"></i></span>
+<span class="action-icon" style="background:#1ab394;"><i class="fa fa-check-circle"></i></span>
 <span class="action-text">我的选课</span>
 </a>
 <a class="action-card" th:href="@{/student/grade(sno=${param.sno})}">
-<span class="action-icon icon-orange"><i class="fa fa-file-text-o"></i></span>
+<span class="action-icon" style="background:#f8ac59;"><i class="fa fa-file-text-o"></i></span>
 <span class="action-text">成绩查询</span>
 </a>
 <a class="action-card" th:href="@{/student/schedule(sno=${param.sno})}">
-<span class="action-icon icon-purple"><i class="fa fa-calendar"></i></span>
+<span class="action-icon" style="background:#9b59b6;"><i class="fa fa-calendar"></i></span>
 <span class="action-text">我的课表</span>
 </a>
 <a class="action-card" th:href="@{/student/exam(sno=${param.sno})}">
-<span class="action-icon icon-red"><i class="fa fa-clock-o"></i></span>
+<span class="action-icon" style="background:#ed5565;"><i class="fa fa-clock-o"></i></span>
 <span class="action-text">考试时间</span>
 </a>
 <a class="action-card" th:href="@{/notification/list}">
-<span class="action-icon icon-gray"><i class="fa fa-bell-o"></i></span>
-<span class="action-text">
-消息中心
-<span id="unread-badge" class="badge" style="display:none;background-color:#ed5565;font-size:10px;padding:2px 5px;border-radius:10px;vertical-align:middle;margin-left:4px;"></span>
-</span>
+<span class="action-icon" style="background:#676a6c;"><i class="fa fa-bell-o"></i></span>
+<span class="action-text">消息中心<span id="unread-badge" class="badge" style="display:none;background:#ed5565;font-size:10px;padding:2px 5px;border-radius:10px;margin-left:4px;"></span></span>
 </a>
 </div>
-</div></div></div></div></div>
+</div></div></div></div>
+
+</div>
 <th:block th:include="include :: footer" />
 <script th:inline="javascript">
 var sno = [[${sno}]];
 $(function() {
-    $.ajax({url: ctx + "student/info", type: "post", data: {sno: sno}, success: function(r) {
-        if (r.code == 0 && r.data) { $("#info-sno").text(r.data.sno); $("#info-name").text(r.data.sname); }
-    }});
+    loadDashboard();
     $.get(ctx + "notification/unread-count", function(r) {
-        if (r.code == 0 && r.count > 0) {
-            $("#unread-badge").text(r.count).show();
-        }
+        if (r.code == 0 && r.count > 0) { $("#unread-badge").text(r.count).show(); }
     });
 });
-</script></body></html>
 
+function loadDashboard() {
+    var sem = $("#semester-select").val() || "";
+    $.ajax({url: ctx + "student/dashboard", type: "post", data: {sno: sno, semester: sem}, success: function(r) {
+        if (r.code == 0 && r.data) {
+            var d = r.data;
+            $("#info-sno").text(sno);
+            $("#info-name").text(d.sname);
+            $("#info-dept").text(d.deptName || '-');
 
+            // 统计卡片（学期模式下显示当学期，否则显示累计）
+            var isSem = sem && sem.length > 0;
+            $("#stat-gpa").text(d.gpa);
+            $("#stat-credit").text(isSem ? d.semTotal : d.totalCredits);
+            $("#stat-course").text(d.enrolledCourses);
+            $("#stat-exam").text(d.exams ? d.exams.length : 0);
+            $("#sem-credits-label").text(isSem ? '' : '(累计)');
 
+            // 学分进度（累计始终显示）
+            $("#progress-label").text(isSem ? '(当前学期)' : '(累计)');
+            updateProgress("required", isSem ? d.semRequired : d.requiredCredits, d.requiredTarget);
+            updateProgress("elective", isSem ? d.semElective : d.electiveCredits, d.electiveTarget);
+            updateProgress("total", isSem ? d.semTotal : d.totalCredits, d.totalTarget);
+
+            // 学期下拉列表
+            if (d.semesters && d.semesters.length > 0) {
+                var sel = $("#semester-select");
+                var cur = sel.val();
+                sel.empty();
+                sel.append('<option value="">全部学期（累计）</option>');
+                $.each(d.semesters, function(i, s) {
+                    sel.append('<option value="' + s + '">' + s + '</option>');
+                });
+                sel.val(cur || sem);
+            }
+
+            // 考试列表
+            if (d.exams && d.exams.length > 0) {
+                var html = '';
+                $.each(d.exams, function(i, exam) {
+                    html += '<div class="exam-card"><div class="exam-title"><i class="fa fa-calendar"></i> 即将考试</div>';
+                    html += '<div class="exam-course">' + exam.cname + '</div>';
+                    html += '<div class="exam-time">' + exam.examTime + '</div></div>';
+                });
+                $("#exam-list").html(html);
+            }
+
+            // 待办
+            var todos = [];
+            if (d.unreadNotif > 0) todos.push({text: '有 ' + d.unreadNotif + ' 条未读消息', cls: 'danger'});
+            var gap = d.totalTarget - d.totalCredits;
+            if (gap > 0) todos.push({text: '距毕业还差 ' + gap.toFixed(0) + ' 学分（共需 ' + d.totalTarget + '）', cls: 'warn'});
+            else todos.push({text: '已满足毕业学分要求！', cls: 'info'});
+            var todoHtml = '';
+            $.each(todos, function(i, t) {
+                todoHtml += '<div class="todo-item"><span class="todo-dot ' + t.cls + '"></span>' + t.text + '</div>';
+            });
+            $("#todo-list").html(todoHtml || '<p style="color:#999;text-align:center;padding:20px;">暂无待办</p>');
+        }
+    }});
+}
+
+function updateProgress(type, value, target) {
+    var pct = target > 0 ? Math.min(100, Math.round(value / target * 100)) : 0;
+    $("#prog-" + type).text(value);
+    $("#bar-" + type).css("width", pct + "%").text(pct + "%");
+}
+</script>
+</body></html>
